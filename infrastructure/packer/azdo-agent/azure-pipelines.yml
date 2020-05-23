@@ -1,0 +1,41 @@
+#############################################################
+# Packer Build
+# 
+# This pipeline will build a Packer image in Azure.
+#############################################################
+name: 'Packer Build'
+
+trigger: 'none'
+# trigger:
+#   batch: true
+#   branches:
+#     include:
+#     - master
+#   paths:
+#     include:
+#     - 'infrastructure/packer/azdo-agent'
+
+variables:
+- group: 'shared-packer'
+## Contains:
+## * agentPool
+## * packerAzureSubscription
+## * packerWorkingDirectoryBase
+## Set these variables on pipeline creation or uncomment and update in here if it will be static
+- name: 'templateName'
+  value: 'azdo-agent'
+# - name: 'packerAzureLocation'
+#   value: 'REPLACE_ME'
+# - name: 'packerAzureResourceGroup'
+#   value: 'REPLACE_ME'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- template: '../../../.devops/pipelines/templates/packerBuild.tpl.stage.yml'
+  parameters:
+    packerWorkingDirectory: '$(packerWorkingDirectoryBase)/$(templateName)'
+    azureSubscription: '$(packerAzureSubscription)'
+    packerAzureLocation: '$(packerAzureLocation)'
+    packerAzureResourceGroup: '$(packerAzureResourceGroup)'

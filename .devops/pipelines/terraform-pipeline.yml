@@ -1,0 +1,60 @@
+#############################################################
+# Terraform Apply/Destroy
+# 
+# This pipeline will allow a Terraform template to be
+# applied and destroyed.
+#############################################################
+name: 'Terraform CI'
+
+trigger: 'none'
+# trigger:
+#   batch: true
+#   branches:
+#     include:
+#     - master
+#   paths:
+#     include:
+#     - 'path/to/terraform/root'
+
+variables:
+- group: 'shared-terraform'
+## Contains:
+## * agentPool
+## * terraformAzureSubscription
+## * terraformStorageAccount
+## * terraformWorkingDirectoryBase
+## Set these variables on pipeline creation or uncomment and update in here if it will be static
+# - name: 'templateName'
+#   value: 'REPLACE_ME'
+# - name: 'tfPlan'
+#   value: true
+# - name: 'tfApply'
+#   value: false
+# - name: 'tfDestroyPlan'
+#   value: false
+# - name: 'tfDestroyApply'
+#   value: false
+
+pool:
+  name: '$(agentPool)'
+
+stages:
+- template: '../../../.devops/pipelines/templates/terraformApply.tpl.stage.yml'
+  parameters:
+    terraformWorkingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
+    azureSubscription: '$(terraformAzureSubscription)'
+    terraformStorageAccount: '$(terraformStorageAccount)'
+    terraformWorkspace: ''
+    terraformInputVariables: {}
+    tfPlan: '$(tfPlan)'
+    tfApply: '$(tfApply)'
+
+- template: '../../../.devops/pipelines/templates/terraformDestroy.tpl.stage.yml'
+  parameters:
+    terraformWorkingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
+    azureSubscription: '$(terraformAzureSubscription)'
+    terraformStorageAccount: '$(terraformStorageAccount)'
+    terraformWorkspace: ''
+    terraformInputVariables: {}
+    tfDestroyPlan: '$(tfDestroyPlan)'
+    tfDestroyApply: '$(tfDestroyApply)'

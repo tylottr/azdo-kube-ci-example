@@ -1,0 +1,28 @@
+{
+    "env": {
+        "browser": true,
+        "commonjs": true,
+        "es6": true,
+        "node": true,
+        "mocha": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:mocha/recommended"
+    ],
+    "plugins": [
+        "mocha"
+    ],
+    "globals": {
+        "Atomics": "readonly",
+        "SharedArrayBuffer": "readonly"
+    },
+    "parserOptions": {
+        "ecmaVersion": 2018
+    },
+    "rules": {
+        "no-unused-vars": ["error", { "argsIgnorePattern": "next" }],
+        "semi": 1,
+        "mocha/max-top-level-suites": ["warn", { "limit": 15 }]
+    }
+}

@@ -1,0 +1,103 @@
+#############################################################
+# Terraform Init Steps
+#
+# This template contains a list of steps to set up Terraform
+# ready for plan/apply phases.
+# To use these steps outside of the template these can
+# simply be copied out into another template e.g.
+# job or stage template.
+#############################################################
+parameters:
+- name: 'terraformVersion'
+  type: 'string'
+  default: '0.12.25'
+- name: 'terraformWorkingDirectory'
+  type: 'string'
+  default: '$(Build.Repository.LocalPath)'
+- name: 'azureSubscription'
+  type: 'string'
+  default: ''
+- name: 'terraformStorageAccount'
+  type: 'string'
+  default: ''
+- name: 'sasTokenDuration'
+  type: 'string'
+  default: '2 hours'
+- name: 'terraformWorkspace'
+  type: 'string'
+  default: ''
+
+steps:
+- task: TerraformInstaller@0
+  name: 'terraformInstall'
+  displayName: 'Install Terraform'
+  condition: succeeded()
+  inputs:
+    terraformVersion: '${{ parameters.terraformVersion }}'
+
+- task: AzureCLI@2
+  name: 'terraformSetup'
+  displayName: 'Set variables for Terraform'
+  condition: succeeded()
+  inputs:
+    azureSubscription: '${{ parameters.azureSubscription }}'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      echo "Generating SAS token"
+      end=`date --date "now + $sasTokenDuration" --utc "+%Y-%m-%dT%H:%MZ"`
+      sas=`az storage container generate-sas --name tfstate --expiry $end --https-only --permissions acdlrw --output tsv`
+      echo "##vso[task.setvariable variable=ARM_SAS_TOKEN;issecret=true]$sas"
+
+      echo "Setting authentication details"
+      echo "##vso[task.setvariable variable=ARM_TENANT_ID;issecret=true]$tenantId"
+      echo "##vso[task.setvariable variable=ARM_SUBSCRIPTION_ID;issecret=true]`az account show --output tsv --query id`"
+      echo "##vso[task.setvariable variable=ARM_CLIENT_ID;issecret=true]$servicePrincipalId"
+      echo "##vso[task.setvariable variable=ARM_CLIENT_SECRET;issecret=true]$servicePrincipalKey"
+    workingDirectory: '${{ parameters.terraformWorkingDirectory }}'
+    addSpnToEnvironment: true
+  env:
+    AZURE_STORAGE_AUTH_MODE: 'key'
+    AZURE_STORAGE_ACCOUNT: '${{ parameters.terraformStorageAccount }}'
+    sasTokenDuration: "${{ parameters.sasTokenDuration }}"
+
+- task: Bash@3
+  name: 'terraformInit'
+  displayName: 'Terraform Init'
+  condition: succeeded()
+  inputs:
+    targetType: 'inline'
+    script: terraform init -backend-config="storage_account_name=$AZURE_STORAGE_ACCOUNT"
+    workingDirectory: '${{ parameters.terraformWorkingDirectory }}'
+  env:
+    ARM_SAS_TOKEN: '$(ARM_SAS_TOKEN)'
+    AZURE_STORAGE_ACCOUNT: '${{ parameters.terraformStorageAccount }}'
+
+- task: Bash@3
+  name: 'terraformWorkspace'
+  displayName: 'Terraform Workspace Select'
+  condition: succeeded()
+  inputs:
+    targetType: 'inline'
+    script: |
+      if [ ! -z "$terraformWorkspace" ]; then
+        terraform workspace select $terraformWorkspace || terraform workspace new $terraformWorkspace
+      fi
+    workingDirectory: '${{ parameters.terraformWorkingDirectory }}'
+  env:
+    ARM_SAS_TOKEN: '$(ARM_SAS_TOKEN)'
+    ARM_TENANT_ID: '$(ARM_TENANT_ID)'
+    ARM_SUBSCRIPTION_ID: '$(ARM_SUBSCRIPTION_ID)'
+    ARM_CLIENT_ID: '$(ARM_CLIENT_ID)'
+    ARM_CLIENT_SECRET: '$(ARM_CLIENT_SECRET)'
+    terraformWorkspace: '${{ parameters.terraformWorkspace }}'
+- task: Bash@3
+  name: 'terraformValidate'
+  displayName: 'Terraform Validate'
+  condition: succeeded()
+  inputs:
+    targetType: 'inline'
+    script: 'terraform validate'
+    workingDirectory: '${{ parameters.terraformWorkingDirectory }}'
+  env:
+    ARM_SAS_TOKEN: '$(ARM_SAS_TOKEN)'

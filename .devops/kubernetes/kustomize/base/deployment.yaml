@@ -1,0 +1,42 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: kci
+spec:
+  replicas: 1
+  template:
+    spec:
+      automountServiceAccountToken: true
+      serviceAccountName: kci
+      containers:
+      - name: service
+        image: service:latest
+        ports:
+        - name: http
+          containerPort: 3000
+        env:
+        - name: NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['app']
+        - name: PORT
+          value: '3000'
+        livenessProbe:
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          httpGet:
+            path: /health
+            port: http
+        readinessProbe:
+          initialDelaySeconds: 20
+          periodSeconds: 30
+          httpGet:
+            path: /health
+            port: http
+        resources:
+          requests:
+            cpu: 25m
+            memory: 64Mi
+          limits:
+            cpu: 50m
+            memory: 64Mi

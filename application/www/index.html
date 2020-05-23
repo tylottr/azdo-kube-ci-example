@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Welcome to *.www.example.com!</title>
+  
+  <link rel='icon' href='favicon.ico' type='image/x-icon'>
+
+  <link rel="stylesheet" href="index.css">
+  <script src="index.js"></script>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+
+<body>
+  <header class="jumbotron text-center" style="padding: .5rem; margin-bottom: 0rem;">
+    <h1>Eggs</h1>
+    <p>Example endpoints all around!</p>
+  </header>
+
+  <content class="container">
+    <div id="endpoints" class="container">
+
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Endpoint</th>
+            <th scope="col">Status</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr id="www">
+            <td>
+              <a href="http://www.www.example.com">
+                www
+              </a>
+            </td>
+            <td>
+              <span class="health-dot health-dot-unknown"></span>
+            </td>
+            <td>
+              <button type="button" value="www"
+                class="btn btn-sm btn-primary">
+                  Refresh
+              </button>
+            </td>
+          </tr>
+
+          <tr id="express">
+            <td>
+              <a href="http://express.www.example.com">
+                express
+              </a>
+            </td>
+            <td>
+              <span class="health-dot health-dot-unknown"></span>
+            </td>
+            <td>
+              <button type="button" value="express"
+                class="btn btn-sm btn-primary">
+                  Refresh
+              </button>
+            </td>
+          </tr>
+
+          <tr id="flask">
+            <td>
+              <a href="http://flask.www.example.com">
+                flask
+              </a>
+            </td>
+            <td>
+              <span class="health-dot health-dot-unknown"></span>
+            </td>
+            <td>
+              <button type="button" value="flask"
+                class="btn btn-sm btn-primary">
+                  Refresh
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </content>
+</body>
+
+</html>

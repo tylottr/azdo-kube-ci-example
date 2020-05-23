@@ -1,0 +1,55 @@
+#############################################################
+# Kubernetes Application
+# 
+# This pipeline will build and deploy a containerised
+# application to a Kubernetes cluster.
+#############################################################
+name: '$(appName)-$(Build.SourceBranchName)'
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - 'application/express'
+
+variables:
+- group: 'shared-app'
+## Contains:
+## * agentPool
+## * appBasePath
+## * appDomain
+## * appKustomizePath
+## * containerRegistry
+## * kubernetesEnvironment
+## * kubernetesResource
+# Pipeline Variables
+## Set these variables on pipeline creation or uncomment and update in here if it will be static
+- name: 'appName'
+  value: 'express'
+
+pool:
+  name: '$(agentPool)'
+
+stages:
+- template: '../../.devops/pipelines/templates/nodeJsNpmTest.tpl.stage.yml'
+  parameters:
+    appName: '$(appName)'
+    appBasePath: '$(appBasePath)/$(appName)'
+  
+- template: '../../.devops/pipelines/templates/dockerBuild.tpl.stage.yml'
+  parameters:
+    appName: '$(appName)'
+    appBasePath: '$(appBasePath)/$(appName)'
+    containerRegistry: '$(containerRegistry)'
+
+- template: '../../.devops/pipelines/templates/kubernetesKustomizeRelease.tpl.stage.yml'
+  parameters:
+    appName: '$(appName)'
+    appDomain: '$(appDomain)'
+    appContainerImage: '$(containerRegistry)/$(appName)'
+    appKustomizePath: '$(appKustomizePath)'
+    kubernetesEnvironment: '$(kubernetesEnvironment)'
+    kubernetesResource: '$(kubernetesResource)'

@@ -1,0 +1,8 @@
+Dockerfile
+.dockerignore
+azure-pipelines.yml
+.gitgnore
+node_modules/
+tests/
+lint-results.xml
+test-results.xml

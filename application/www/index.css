@@ -1,0 +1,19 @@
+.health-dot {
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 1px solid black;
+}
+
+.health-dot-unknown {
+  background-color: gray;
+}
+
+.health-dot-healthy {
+  background-color: lightgreen;
+}
+
+.health-dot-unhealthy {
+  background-color: red;
+}

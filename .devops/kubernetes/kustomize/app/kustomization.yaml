@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: REPLACE_ME-
+commonLabels:
+  app: REPLACE_ME
+
+bases:
+- ../base
+
+patchesStrategicMerge:
+- ./deployment.yaml
+
+resources:
+- ./ingress.yaml
+
+images:
+- name: service
+  newName: REPLACE_ME
+  newTag: REPLACE_ME

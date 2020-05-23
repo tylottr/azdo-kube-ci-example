@@ -1,0 +1,66 @@
+#############################################################
+# Terraform Apply/Destroy
+# 
+# This pipeline will allow a Terraform template to be
+# applied and destroyed.
+#############################################################
+name: 'Terraform CI'
+
+trigger: 'none'
+# trigger:
+#   batch: true
+#   branches:
+#     include:
+#     - master
+#   paths:
+#     include:
+#     - 'infrastructure/terraform/kcidemo'
+
+variables:
+- group: 'shared-terraform'
+## Contains:
+## * agentPool
+## * terraformAzureSubscription
+## * terraformStorageAccount
+## * terraformWorkingDirectoryBase
+## Set these variables on pipeline creation or uncomment and update in here if it will be static
+- name: 'templateName'
+  value: 'kcidemo'
+# - name: 'tfPlan'
+#   value: true
+# - name: 'tfApply'
+#   value: false
+# - name: 'tfDestroyPlan'
+#   value: false
+# - name: 'tfDestroyApply'
+#   value: false
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- template: '../../../.devops/pipelines/templates/terraformApply.tpl.stage.yml'
+  parameters:
+    terraformWorkingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
+    azureSubscription: '$(terraformAzureSubscription)'
+    terraformStorageAccount: '$(terraformStorageAccount)'
+    terraformWorkspace: ''
+    terraformInputVariables:
+      resource_group_name: '$(resourceGroupName)'
+      resource_prefix: '$(resourcePrefix)'
+      vm_azdo_source_image_id: '$(vmAzdoSourceImageId)'
+    plan: '$(tfPlan)'
+    apply: '$(tfApply)'
+
+- template: '../../../.devops/pipelines/templates/terraformDestroy.tpl.stage.yml'
+  parameters:
+    terraformWorkingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
+    azureSubscription: '$(terraformAzureSubscription)'
+    terraformStorageAccount: '$(terraformStorageAccount)'
+    terraformWorkspace: ''
+    terraformInputVariables:
+      resource_group_name: '$(resourceGroupName)'
+      resource_prefix: '$(resourcePrefix)'
+      vm_azdo_source_image_id: '$(vmAzdoSourceImageId)'
+    planDestroy: '$(tfDestroyPlan)'
+    applyDestroy: '$(tfDestroyApply)'

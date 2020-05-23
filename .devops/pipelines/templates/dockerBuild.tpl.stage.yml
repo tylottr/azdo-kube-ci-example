@@ -1,0 +1,80 @@
+#############################################################
+# Docker Build Stage
+#
+# This template contains a stage to perform a Docker Build
+# operation.
+#############################################################
+parameters:
+- name: 'appName'
+  type: 'string'
+  default: ''
+- name: 'appBasePath'
+  type: 'string'
+  default: '$(Build.Repository.LocalPath)'
+- name: 'containerRegistry'
+  type: 'string'
+  default: ''
+- name: 'preBuildTasks'
+  type: 'stepList'
+  default: []
+
+stages:
+- stage: 'buildAndPushDockerContainerImage'
+  displayName: 'Build and Push Docker Container Image'
+  condition: succeeded()
+
+  jobs:
+  - job: 'validateBuildConfiguration'
+    displayName: 'Validate Build Configuration'
+
+    steps:
+    - checkout: 'none'
+    - task: Bash@3
+      name: 'validateBuildConfiguration'
+      displayName: 'Validate Build Configuration'
+      inputs:
+        targetType: 'inline'
+        script: |
+          if [ -z "$appName" ]; then
+            echo "##vso[task.logissue type=error]Missing or empty template parameter \"appName\""
+            echo "##vso[task.complete result=Failed]"
+          fi
+
+          if [ -z "$appBasePath" ]; then
+            echo "##vso[task.logissue type=error]Missing or empty template parameter \"appBasePath\""
+            echo "##vso[task.complete result=Failed]"
+          fi
+
+          if [ -z "$containerRegistry" ]; then
+            echo "##vso[task.logissue type=error]Missing or empty template parameter \"containerRegistry\""
+            echo "##vso[task.complete result=Failed]"
+          fi
+      env:
+        appName: '${{ parameters.appName }}'
+        appBasePath: '${{ parameters.appBasePath }}'
+        containerRegistry: '${{ parameters.containerRegistry }}'
+
+  - job: 'buildAndPushDockerContainerImage'
+    displayName: 'Build and Push Docker Container Image'
+    dependsOn: 'validateBuildConfiguration'
+    condition: succeeded('validateBuildConfiguration')
+
+    steps:
+    - ${{ each step in parameters.preBuildTasks }}:
+      - ${{ each pair in step }}:
+          ${{ pair.key }}: ${{ pair.value }}
+
+    - task: Docker@2
+      name: 'buildAndPushImage'
+      displayName: 'Build and Push the Docker Container image'
+      inputs:
+        containerRegistry: '${{ parameters.containerRegistry }}'
+        repository: '${{ parameters.appName }}'
+        command: 'buildAndPush'
+        Dockerfile: '${{ parameters.appBasePath }}/Dockerfile'
+        buildContext: '${{ parameters.appBasePath }}'
+        tags: |
+          $(Build.SourceBranchName)-$(Build.BuildId)
+          $(Build.SourceBranchName)
+          latest
+        addPipelineData: true

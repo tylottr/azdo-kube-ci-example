@@ -1,0 +1,119 @@
+#############################################################
+# Packer Build Stage
+#
+# This template contains a stage to perform a Packer Build
+# operation.
+# 
+# NOTE: Packer install is local and the command is ran
+# from the local directory.
+#############################################################
+parameters:
+- name: 'packerVersion'
+  type: 'string'
+  default: '1.5.6'
+- name: 'azureSubscription'
+  type: 'string'
+  default: ''
+- name: 'packerWorkingDirectory'
+  type: 'string'
+  default: '$(Build.Repository.LocalPath)'
+- name: 'packerAzureLocation'
+  type: 'string'
+  default: ''
+- name: 'packerAzureResourceGroup'
+  type: 'string'
+  default: ''
+
+stages:
+- stage: 'buildImage'
+  displayName: 'Build Image'
+  condition: succeeded()
+
+  jobs:
+  - job: 'validateBuildConfiguration'
+    displayName: 'Validate Build Configuration'
+
+    steps:
+    - checkout: 'none'
+    - task: Bash@3
+      name: 'validateBuildConfiguration'
+      displayName: 'Validate Build Configuration'
+      inputs:
+        targetType: 'inline'
+        script: |
+          if [ -z "$azureSubscription" ]; then
+            echo "##vso[task.logissue type=error]Missing or empty template parameter \"azureSubscription\""
+            echo "##vso[task.complete result=Failed]"
+          fi
+
+          if [ -z "$packerAzureLocation" ]; then
+            echo "##vso[task.logissue type=error]Missing or empty template parameter \"packerAzureLocation\""
+            echo "##vso[task.complete result=Failed]"
+          fi
+
+          if [ -z "$packerAzureResourceGroup" ]; then
+            echo "##vso[task.logissue type=error]Missing or empty template parameter \"packerAzureResourceGroup\""
+            echo "##vso[task.complete result=Failed]"
+          fi
+      env:
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        packerAzureLocation: '${{ parameters.packerAzureLocation }}'
+        packerAzureResourceGroup: '${{ parameters.packerAzureResourceGroup }}'
+
+  - job: buildImage
+    displayName: Build Image
+    dependsOn: 'validateBuildConfiguration'
+    condition: succeeded('validateBuildConfiguration')
+
+    steps:
+    - task: Bash@3
+      name: 'downloadPacker'
+      displayName: 'Download Packer'
+      inputs:
+        targetType: 'inline'
+        script: |
+          wget -q "https://releases.hashicorp.com/packer/${packerVersion}/packer_${packerVersion}_linux_amd64.zip" -O packer.zip
+          unzip packer.zip packer
+          rm packer.zip
+          ./packer version
+        workingDirectory: '${{ parameters.packerWorkingDirectory }}'
+      env:
+        packerVersion: '${{ parameters.packerVersion }}'
+
+    - task: AzureCLI@2
+      name: 'initializeBuild'
+      displayName: 'Initialize Build'
+      inputs:
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          echo "Setting authentication details"
+          echo "##vso[task.setvariable variable=AZURE_SUBSCRIPTION_ID;issecret=true]`az account show --output tsv --query id`"
+          echo "##vso[task.setvariable variable=AZURE_CLIENT_ID;issecret=true]$servicePrincipalId"
+          echo "##vso[task.setvariable variable=AZURE_CLIENT_SECRET;issecret=true]$servicePrincipalKey"
+
+          echo "Generating parameters"
+          cat <<EOF > parameters.json
+          {
+            "location": "$packerAzureLocation",
+            "resource_group": "$packerAzureResourceGroup"
+          }
+          EOF
+        workingDirectory: '${{ parameters.packerWorkingDirectory }}'
+        addSpnToEnvironment: true
+      env:
+        packerAzureLocation: '${{ parameters.packerAzureLocation }}'
+        packerAzureResourceGroup: '${{ parameters.packerAzureResourceGroup }}'
+
+    - task: Bash@3
+      name: 'runBuild'
+      displayName: 'Run Build'
+      inputs:
+        targetType: 'inline'
+        script: './packer build -var-file parameters.json agent.json'
+        workingDirectory: '${{ parameters.packerWorkingDirectory }}'
+      env:
+        AZURE_SUBSCRIPTION_ID: '$(AZURE_SUBSCRIPTION_ID)'
+        AZURE_CLIENT_ID: '$(AZURE_CLIENT_ID)'
+        AZURE_CLIENT_SECRET: '$(AZURE_CLIENT_SECRET)'

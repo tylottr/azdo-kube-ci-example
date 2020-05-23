@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: kci
+  annotations:
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        backend:
+          serviceName: kci
+          servicePort: http

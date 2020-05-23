@@ -1,0 +1,124 @@
+#############################################################
+# Terraform Apply Stage
+#
+# This template contains a stage to perform a Terraform
+# Apply operation.
+#############################################################
+parameters:
+- name: 'terraformVersion'
+  type: 'string'
+  default: '0.12.25'
+- name: 'terraformWorkingDirectory'
+  type: 'string'
+  default: '$(Build.Repository.LocalPath)'
+- name: 'azureSubscription'
+  type: 'string'
+  default: ''
+- name: 'terraformStorageAccount'
+  type: 'string'
+  default: ''
+- name: 'sasTokenDuration'
+  type: 'string'
+  default: '2 hours'
+- name: 'terraformWorkspace'
+  type: 'string'
+  default: ''
+- name: 'terraformInputVariables'
+  type: 'object'
+  default: {}
+- name: 'plan'
+  type: 'string'
+  default: 'true'
+- name: 'apply'
+  type: 'string'
+  default: 'false'
+
+stages:
+- stage: 'runTerraformApply'
+  displayName: 'Run Terraform Apply'
+  condition: succeeded()
+  variables:
+    TF_IN_AUTOMATION: true
+    plan: '${{ parameters.plan }}'
+    apply: '${{ parameters.apply }}'
+
+  jobs:
+  - job: 'validateApplyConfiguration'
+    displayName: 'Validate Apply Configuration'
+    
+    steps:
+    - checkout: 'none'
+    - task: Bash@3
+      name: 'validateApplyConfiguration'
+      displayName: 'Validate Apply Configuration'
+      inputs:
+        targetType: 'inline'
+        script: |
+          if [ -z "$azureSubscription" ]; then
+            echo "##vso[task.logissue type=error]Missing or empty template parameter \"azureSubscription\""
+            echo "##vso[task.complete result=Failed]"
+          fi
+
+          if [ -z "$terraformStorageAccount" ]; then
+            echo "##vso[task.logissue type=error]Missing or empty template parameter \"terraformStorageAccount\""
+            echo "##vso[task.complete result=Failed]"
+          fi
+      env:
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        terraformStorageAccount: '${{ parameters.terraformStorageAccount }}'
+
+  - job: 'runTerraformApply'
+    displayName: 'Run Terraform Apply'
+    dependsOn: 'validateApplyConfiguration'
+    condition: succeeded('validateApplyConfiguration')
+    workspace:
+      clean: all
+
+    steps:
+    - template: terraformInit.tpl.steps.yml
+      parameters:
+        terraformVersion: '${{ parameters.terraformVersion }}'
+        terraformWorkingDirectory: '${{ parameters.terraformWorkingDirectory }}'
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        terraformStorageAccount: '${{ parameters.terraformStorageAccount }}'
+        sasTokenDuration: '${{ parameters.sasTokenDuration }}'
+        terraformWorkspace: '${{ parameters.terraformWorkspace }}'
+
+    - task: Bash@3
+      name: 'terraformPlan'
+      displayName: 'Terraform Plan'
+      condition: and(succeeded(), eq(variables.plan, 'true'))
+      inputs:
+        targetType: 'inline'
+        script: |
+          if [ -z "$terraformWorkspace" ]; then
+            terraform plan -out tf.plan
+          else
+            terraform plan -out tf.plan -var-file tfvars/$terraformWorkspace.tfvars
+          fi
+        workingDirectory: '${{ parameters.terraformWorkingDirectory }}'
+      env:
+        ARM_TENANT_ID: '$(ARM_TENANT_ID)'
+        ARM_SUBSCRIPTION_ID: '$(ARM_SUBSCRIPTION_ID)'
+        ARM_CLIENT_ID: '$(ARM_CLIENT_ID)'
+        ARM_CLIENT_SECRET: '$(ARM_CLIENT_SECRET)'
+        ARM_SAS_TOKEN: '$(ARM_SAS_TOKEN)'
+        terraformWorkspace: '${{ variables.terraformWorkspace }}'
+        ${{ each item in parameters.terraformInputVariables }}:
+          TF_VAR_${{ item.key }}: ${{ item.value }}
+
+    - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+      - task: Bash@3
+        name: 'terraformApply'
+        displayName: 'Terraform Apply'
+        condition: and(succeeded(), eq(variables.plan, 'true'), eq(variables.apply, 'true'))
+        inputs:
+          targetType: 'inline'
+          script: 'terraform apply tf.plan'
+          workingDirectory: '${{ parameters.terraformWorkingDirectory }}'
+        env:
+          ARM_TENANT_ID: '$(ARM_TENANT_ID)'
+          ARM_SUBSCRIPTION_ID: '$(ARM_SUBSCRIPTION_ID)'
+          ARM_CLIENT_ID: '$(ARM_CLIENT_ID)'
+          ARM_CLIENT_SECRET: '$(ARM_CLIENT_SECRET)'
+          ARM_SAS_TOKEN: '$(ARM_SAS_TOKEN)'

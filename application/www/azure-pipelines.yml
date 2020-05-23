@@ -1,0 +1,60 @@
+#############################################################
+# Kubernetes Application
+# 
+# This pipeline will build and deploy a containerised
+# application to a Kubernetes cluster.
+#############################################################
+name: '$(appName)-$(Build.SourceBranchName)'
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - 'application/www'
+
+variables:
+- group: 'shared-app'
+## Contains:
+## * agentPool
+## * appBasePath
+## * appDomain
+## * appKustomizePath
+## * containerRegistry
+## * kubernetesEnvironment
+## * kubernetesResource
+# Pipeline Variables
+## Set these variables on pipeline creation or uncomment and update in here if it will be static
+- name: 'appName'
+  value: 'www'
+
+pool:
+  name: '$(agentPool)'
+
+stages:
+- template: '../../.devops/pipelines/templates/dockerBuild.tpl.stage.yml'
+  parameters:
+    appName: '$(appName)'
+    appBasePath: '$(appBasePath)/$(appName)'
+    containerRegistry: '$(containerRegistry)'
+    preBuildTasks:
+    - task: Bash@3
+      name: 'updateFiles'
+      displayName: 'Update files'
+      inputs:
+        targetType: 'inline'
+        script: sed -i index.html -e "s/www.example.com/$appDomain/g"
+        workingDirectory: '$(appBasePath)/$(appName)'
+      env:
+        appDomain: '$(appDomain)'
+
+- template: '../../.devops/pipelines/templates/kubernetesKustomizeRelease.tpl.stage.yml'
+  parameters:
+    appName: '$(appName)'
+    appDomain: '$(appDomain)'
+    appContainerImage: '$(containerRegistry)/$(appName)'
+    appKustomizePath: '$(appKustomizePath)'
+    kubernetesEnvironment: '$(kubernetesEnvironment)'
+    kubernetesResource: '$(kubernetesResource)'

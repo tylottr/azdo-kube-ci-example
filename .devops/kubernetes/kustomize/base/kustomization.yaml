@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+commonLabels:
+  parentApp: kube-ci
+
+resources:
+- ./deployment.yaml
+- ./service.yaml
+- ./serviceaccount.yaml
