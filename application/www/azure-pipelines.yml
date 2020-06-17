@@ -34,7 +34,7 @@ pool:
   name: '$(agentPool)'
 
 stages:
-- template: '../../.devops/pipelines/templates/dockerBuild.tpl.stage.yml'
+- template: '/.devops/pipelines/templates/dockerBuild.tpl.stage.yml'
   parameters:
     appName: '$(appName)'
     appBasePath: '$(appBasePath)/$(appName)'
@@ -50,7 +50,7 @@ stages:
       env:
         appDomain: '$(appDomain)'
 
-- template: '../../.devops/pipelines/templates/kubernetesKustomizeRelease.tpl.stage.yml'
+- template: '/.devops/pipelines/templates/kubernetesKustomizeRelease.tpl.stage.yml'
   parameters:
     appName: '$(appName)'
     appDomain: '$(appDomain)'

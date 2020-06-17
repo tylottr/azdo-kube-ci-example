@@ -34,18 +34,18 @@ pool:
   name: '$(agentPool)'
 
 stages:
-- template: '../../.devops/pipelines/templates/nodeJsNpmTest.tpl.stage.yml'
+- template: '/.devops/pipelines/templates/nodeJsNpmTest.tpl.stage.yml'
   parameters:
     appName: '$(appName)'
     appBasePath: '$(appBasePath)/$(appName)'
   
-- template: '../../.devops/pipelines/templates/dockerBuild.tpl.stage.yml'
+- template: '/.devops/pipelines/templates/dockerBuild.tpl.stage.yml'
   parameters:
     appName: '$(appName)'
     appBasePath: '$(appBasePath)/$(appName)'
     containerRegistry: '$(containerRegistry)'
 
-- template: '../../.devops/pipelines/templates/kubernetesKustomizeRelease.tpl.stage.yml'
+- template: '/.devops/pipelines/templates/kubernetesKustomizeRelease.tpl.stage.yml'
   parameters:
     appName: '$(appName)'
     appDomain: '$(appDomain)'

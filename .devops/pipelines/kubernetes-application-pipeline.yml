@@ -34,14 +34,14 @@ pool:
   name: '$(agentPool)'
 
 stages:
-- template: 'templates/dockerBuild.tpl.stage.yml'
+- template: '/.devops/pipelines/templates/dockerBuild.tpl.stage.yml'
   parameters:
     appName: '$(appName)'
     appBasePath: '$(appBasePath)/$(appName)'
     containerRegistry: '$(containerRegistry)'
     preBuildTasks: []
 
-- template: 'templates/kubernetesKustomizeRelease.tpl.stage.yml'
+- template: '/.devops/pipelines/templates/kubernetesKustomizeRelease.tpl.stage.yml'
   parameters:
     appName: '$(appName)'
     appDomain: '$(appDomain)'

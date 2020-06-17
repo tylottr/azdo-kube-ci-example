@@ -33,7 +33,7 @@ pool:
   name: '$(agentPool)'
 
 stages:
-- template: '../../../.devops/pipelines/templates/packerBuild.tpl.stage.yml'
+- template: '/.devops/pipelines/templates/packerBuild.tpl.stage.yml'
   parameters:
     packerWorkingDirectory: '$(packerWorkingDirectoryBase)/$(templateName)'
     azureSubscription: '$(packerAzureSubscription)'

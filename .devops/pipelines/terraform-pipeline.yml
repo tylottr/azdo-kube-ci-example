@@ -26,35 +26,23 @@ variables:
 ## Set these variables on pipeline creation or uncomment and update in here if it will be static
 # - name: 'templateName'
 #   value: 'REPLACE_ME'
-# - name: 'tfPlan'
-#   value: true
-# - name: 'tfApply'
+# - name: 'terraformApply'
 #   value: false
-# - name: 'tfDestroyPlan'
-#   value: false
-# - name: 'tfDestroyApply'
+# - name: 'terraformDestroy'
 #   value: false
 
 pool:
   name: '$(agentPool)'
 
 stages:
-- template: '../../../.devops/pipelines/templates/terraformApply.tpl.stage.yml'
+# Template stage used to do a Terraform run.
+# This cannot be reused due to jobs requiring unique names.
+- template: '/.devops/pipelines/templates/terraformRun.tpl.stage.yml'
   parameters:
     terraformWorkingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
     azureSubscription: '$(terraformAzureSubscription)'
     terraformStorageAccount: '$(terraformStorageAccount)'
     terraformWorkspace: ''
+    terraformApply: '$(terraformApply)'
+    terraformDestroy: '$(terraformDestroy)'
     terraformInputVariables: {}
-    tfPlan: '$(tfPlan)'
-    tfApply: '$(tfApply)'
-
-- template: '../../../.devops/pipelines/templates/terraformDestroy.tpl.stage.yml'
-  parameters:
-    terraformWorkingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
-    azureSubscription: '$(terraformAzureSubscription)'
-    terraformStorageAccount: '$(terraformStorageAccount)'
-    terraformWorkspace: ''
-    terraformInputVariables: {}
-    tfDestroyPlan: '$(tfDestroyPlan)'
-    tfDestroyApply: '$(tfDestroyApply)'

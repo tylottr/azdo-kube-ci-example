@@ -1,0 +1,173 @@
+#############################################################
+# Terraform Apply Stage
+#
+# This template contains a stage to perform a Terraform
+# Apply operation.
+#############################################################
+parameters:
+- name: 'terraformVersion'
+  type: 'string'
+  default: '0.12.26'
+- name: 'terraformWorkingDirectory'
+  type: 'string'
+  default: '$(Build.Repository.LocalPath)'
+- name: 'azureSubscription'
+  type: 'string'
+  default: ''
+- name: 'terraformStorageAccount'
+  type: 'string'
+  default: ''
+- name: 'sasTokenDuration'
+  type: 'string'
+  default: '2 hours'
+- name: 'terraformWorkspace'
+  type: 'string'
+  default: ''
+- name: 'terraformVariablesDirectory'
+  type: 'string'
+  default: ''
+- name: 'terraformDevopsEnvironment'
+  type: 'string'
+  default: '$(Build.SourceBranchName)'
+- name: 'terraformInputVariables'
+  type: 'object'
+  default: {}
+- name: 'terraformApply'
+  type: 'string'
+  default: 'false'
+- name: 'terraformDestroy'
+  type: 'string'
+  default: 'false'
+
+
+stages:
+- stage: 'runTerraformPlan'
+  displayName: 'Terraform Plan'
+  condition: succeeded()
+  variables:
+    TF_IN_AUTOMATION: true
+
+  jobs:
+  - job: 'validateTerraformConfiguration'
+    displayName: 'Validate Terraform Configuration'
+  
+    steps:
+    - checkout: 'none'
+    - task: Bash@3
+      name: 'validateConfiguration'
+      displayName: 'Validate Configuration'
+      inputs:
+        targetType: 'inline'
+        script: |
+          if [ -z "$azureSubscription" ]; then
+            echo "##vso[task.logissue type=error]Missing or empty template parameter \"azureSubscription\""
+            echo "##vso[task.complete result=Failed]"
+          fi
+
+          if [ -z "$terraformStorageAccount" ]; then
+            echo "##vso[task.logissue type=error]Missing or empty template parameter \"terraformStorageAccount\""
+            echo "##vso[task.complete result=Failed]"
+          fi
+      env:
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        terraformStorageAccount: '${{ parameters.terraformStorageAccount }}'
+
+  - job: 'runTerraformPlan'
+    displayName: 'Terraform Plan'
+    dependsOn: 'validateTerraformConfiguration'
+    condition: succeeded('validateTerraformConfiguration')
+
+    steps:
+    - checkout: 'self'
+    - template: '/.devops/pipelines/templates/terraformInitAzure.tpl.steps.yml'
+      parameters:
+        terraformVersion: '${{ parameters.terraformVersion }}'
+        terraformWorkingDirectory: '${{ parameters.terraformWorkingDirectory }}'
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        terraformStorageAccount: '${{ parameters.terraformStorageAccount }}'
+        sasTokenDuration: '${{ parameters.sasTokenDuration }}'
+        terraformWorkspace: '${{ parameters.terraformWorkspace }}'
+
+    - task: Bash@3
+      name: 'terraformPlan'
+      displayName: 'Terraform Plan'
+      inputs:
+        targetType: 'inline'
+        script: |
+          tfArgs="-out tf.plan"
+
+          if [ ! -z "$terraformVariablesDirectory" ]; then
+            tfArgs="$tfArgs -var-file $terraformVariablesDirectory/$terraformWorkspace.tfvars"
+          fi
+
+          if [ "$terraformDestroy" == "true" ]; then
+            tfArgs="$tfArgs -destroy"
+          fi
+
+          echo "Running command: terraform plan $tfArgs"
+          terraform plan $tfArgs
+        workingDirectory: '${{ parameters.terraformWorkingDirectory }}'
+      env:
+        ARM_TENANT_ID: '$(ARM_TENANT_ID)'
+        ARM_SUBSCRIPTION_ID: '$(ARM_SUBSCRIPTION_ID)'
+        ARM_CLIENT_ID: '$(ARM_CLIENT_ID)'
+        ARM_CLIENT_SECRET: '$(ARM_CLIENT_SECRET)'
+        ARM_SAS_TOKEN: '$(ARM_SAS_TOKEN)'
+        terraformWorkspace: '${{ parameters.terraformWorkspace }}'
+        terraformVariablesDirectory: '${{ parameters.terraformVariablesDirectory }}'
+        terraformDestroy: '${{ parameters.terraformDestroy }}'
+        ${{ each item in parameters.terraformInputVariables }}:
+          TF_VAR_${{ item.key }}: ${{ item.value }}
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Upload plan'
+      condition: ne(variables['Build.Reason'], 'PullRequest')
+      inputs:
+        targetPath: '${{ parameters.terraformWorkingDirectory }}/tf.plan'
+        artifactName: 'plan'
+
+- stage: 'runTerraformPlanApply'
+  displayName: 'Terraform Plan Apply'
+  condition: and(ne(variables['Build.Reason'], 'PullRequest'), eq(variables['terraformApply'], 'true'))
+  variables:
+    TF_IN_AUTOMATION: true
+
+  jobs:
+  - deployment: 'runTerraformPlanApply'
+    displayName: 'Terraform Plan Apply'
+    environment: '${{ parameters.terraformDevopsEnvironment }}'
+
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: 'self'
+          - template: '/.devops/pipelines/templates/terraformInitAzure.tpl.steps.yml'
+            parameters:
+              terraformVersion: '${{ parameters.terraformVersion }}'
+              terraformWorkingDirectory: '${{ parameters.terraformWorkingDirectory }}'
+              azureSubscription: '${{ parameters.azureSubscription }}'
+              terraformStorageAccount: '${{ parameters.terraformStorageAccount }}'
+              sasTokenDuration: '${{ parameters.sasTokenDuration }}'
+              terraformWorkspace: '${{ parameters.terraformWorkspace }}'
+
+          - task: DownloadPipelineArtifact@2
+            name: 'downloadPlan'
+            displayName: 'Download plan'
+            inputs:
+              artifact: 'plan'
+
+          - task: Bash@3
+            name: 'terraformApply'
+            displayName: 'Terraform Apply'
+            inputs:
+              targetType: 'inline'
+              script: 'terraform apply $terraformPlan'
+              workingDirectory: '${{ parameters.terraformWorkingDirectory }}'
+            env:
+              ARM_TENANT_ID: '$(ARM_TENANT_ID)'
+              ARM_SUBSCRIPTION_ID: '$(ARM_SUBSCRIPTION_ID)'
+              ARM_CLIENT_ID: '$(ARM_CLIENT_ID)'
+              ARM_CLIENT_SECRET: '$(ARM_CLIENT_SECRET)'
+              ARM_SAS_TOKEN: '$(ARM_SAS_TOKEN)'
+              terraformPlan: '$(Pipeline.Workspace)/tf.plan'

@@ -361,16 +361,10 @@ az pipelines create --project=kcidemo --name=terraformci \
   --yml-path=infrastructure/terraform/kcidemo/azure-pipelines.yml --skip-run
 
 az pipelines variable create --project=kcidemo --pipeline-name=terraformci \
-  --name=tfPlan --value=true --allow-override
+  --name=terraformApply --value=false --allow-override
 
 az pipelines variable create --project=kcidemo --pipeline-name=terraformci \
-  --name=tfApply --value=false --allow-override
-
-az pipelines variable create --project=kcidemo --pipeline-name=terraformci \
-  --name=tfDestroyPlan --value=false --allow-override
-
-az pipelines variable create --project=kcidemo --pipeline-name=terraformci \
-  --name=tfDestroyApply --value=false --allow-override
+  --name=terraformDestroy --value=false --allow-override
 ```
 
 And here we will create our Packer configuration.

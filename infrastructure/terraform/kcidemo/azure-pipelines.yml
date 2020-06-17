@@ -26,41 +26,63 @@ variables:
 ## Set these variables on pipeline creation or uncomment and update in here if it will be static
 - name: 'templateName'
   value: 'kcidemo'
-# - name: 'tfPlan'
-#   value: true
-# - name: 'tfApply'
-#   value: false
-# - name: 'tfDestroyPlan'
-#   value: false
-# - name: 'tfDestroyApply'
+# - name: 'terraformApply'
+#   value: 'false'
+# - name: 'terraformDestroy'
 #   value: false
 
 pool:
   vmImage: 'ubuntu-latest'
 
 stages:
-- template: '../../../.devops/pipelines/templates/terraformApply.tpl.stage.yml'
+# Template stage used to do a Terraform run.
+# This cannot be reused due to jobs requiring unique names.
+- template: '/.devops/pipelines/templates/terraformRun.tpl.stage.yml'
   parameters:
     terraformWorkingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
     azureSubscription: '$(terraformAzureSubscription)'
     terraformStorageAccount: '$(terraformStorageAccount)'
     terraformWorkspace: ''
+    terraformApply: '$(terraformApply)'
+    terraformDestroy: 'false' # Set to false as destroy is handled in another step.
     terraformInputVariables:
       resource_group_name: '$(resourceGroupName)'
       resource_prefix: '$(resourcePrefix)'
       vm_azdo_source_image_id: '$(vmAzdoSourceImageId)'
-    plan: '$(tfPlan)'
-    apply: '$(tfApply)'
 
-- template: '../../../.devops/pipelines/templates/terraformDestroy.tpl.stage.yml'
-  parameters:
-    terraformWorkingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
-    azureSubscription: '$(terraformAzureSubscription)'
-    terraformStorageAccount: '$(terraformStorageAccount)'
-    terraformWorkspace: ''
-    terraformInputVariables:
-      resource_group_name: '$(resourceGroupName)'
-      resource_prefix: '$(resourcePrefix)'
-      vm_azdo_source_image_id: '$(vmAzdoSourceImageId)'
-    planDestroy: '$(tfDestroyPlan)'
-    applyDestroy: '$(tfDestroyApply)'
+# Steps below will perform a DESTROY operation on existing infrastructure.
+- stage: 'terraformDestroy'
+  displayName: 'Terraform Destroy'
+  condition: and(always(), eq(variables['terraformDestroy'], 'true'))
+  variables:
+    TF_IN_AUTOMATION: true
+
+  jobs:
+  - job: 'runTerraformDestroy'
+    displayName: 'Terraform Destroy'
+    steps:
+    - checkout: 'self'
+    - template: '/.devops/pipelines/templates/terraformInitAzure.tpl.steps.yml'
+      parameters:
+        terraformVersion: '0.12.26'
+        terraformWorkingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
+        azureSubscription: '$(terraformAzureSubscription)'
+        terraformStorageAccount: '$(terraformStorageAccount)'
+        terraformWorkspace: ''
+
+    - task: Bash@3
+      name: 'terraformDestroy'
+      displayName: 'Terraform Destroy'
+      inputs:
+        targetType: 'inline'
+        script: 'terraform destroy -auto-approve'
+        workingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
+      env:
+        ARM_TENANT_ID: '$(ARM_TENANT_ID)'
+        ARM_SUBSCRIPTION_ID: '$(ARM_SUBSCRIPTION_ID)'
+        ARM_CLIENT_ID: '$(ARM_CLIENT_ID)'
+        ARM_CLIENT_SECRET: '$(ARM_CLIENT_SECRET)'
+        ARM_SAS_TOKEN: '$(ARM_SAS_TOKEN)'
+        TF_VAR_resource_group_name: '$(resourceGroupName)'
+        TF_VAR_resource_prefix: '$(resourcePrefix)'
+        TF_VAR_vm_azdo_source_image_id: '$(vmAzdoSourceImageId)'
