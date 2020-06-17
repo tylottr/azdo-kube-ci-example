@@ -2,7 +2,7 @@
 # Module - AKS
 ###############
 module "aks" {
-  source = "github.com/tylottr/tf-az-kubernetes.git?ref=v0.2.0"
+  source = "github.com/tylottr/tf-az-kubernetes.git?ref=v0.2.1"
 
   tenant_id       = var.tenant_id
   subscription_id = var.subscription_id
