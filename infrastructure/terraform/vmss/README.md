@@ -1,6 +1,6 @@
 # Terraform: azdo-kube-ci-example
 
-This template is used to create an AKS Cluster and ACR. 
+This template is used to create a VMSS-based Azure DevOps Agent pool.
 
 ## Prerequisites
 
@@ -24,7 +24,12 @@ These are the variables used along with their defaults. For any without a value 
 |location|The location of this deployment|`"Central US"`|
 |resource_prefix|A prefix for the name of the resource, used to generate the resource names||
 |tags|Tags given to the resources created by this template|`{}`|
-|resource_group_name|The premade resource group that will be deployed to.||
+
+**Resource-Specific Variables**
+
+|Variable|Description|Default Value|
+|-|-|-|
+|vm_azdo_source_image_id|ID of a source image for the Linux Azure DevOps VMs||
 
 ## Deployment
 

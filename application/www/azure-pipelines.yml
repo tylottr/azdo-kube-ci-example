@@ -18,7 +18,6 @@ trigger:
 variables:
 - group: 'shared-app'
 ## Contains:
-## * agentPool
 ## * appBasePath
 ## * appDomain
 ## * appKustomizePath
@@ -31,7 +30,7 @@ variables:
   value: 'www'
 
 pool:
-  name: '$(agentPool)'
+  vmImage: 'ubuntu-latest'
 
 stages:
 - template: '/.devops/pipelines/templates/dockerBuild.tpl.stage.yml'
@@ -45,7 +44,7 @@ stages:
       displayName: 'Update files'
       inputs:
         targetType: 'inline'
-        script: sed -i index.html -e "s/www.example.com/$appDomain/g"
+        script: sed -i -e "s;www.example.com;$appDomain;g" index.html
         workingDirectory: '$(appBasePath)/$(appName)'
       env:
         appDomain: '$(appDomain)'

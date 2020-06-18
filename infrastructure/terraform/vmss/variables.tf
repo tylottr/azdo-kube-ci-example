@@ -30,7 +30,17 @@ variable "tags" {
   default     = {}
 }
 
-variable "resource_group_name" {
-  description = "The premade resource group that will be deployed to."
+#################################
+# Azure Devops specific variables
+#################################
+variable "vm_azdo_source_image_id" {
+  description = "ID of a source image for the Linux Azure DevOps VMs"
   type        = string
+}
+
+#########
+# Locals
+#########
+locals {
+  resource_prefix = "${var.resource_prefix}-azdo"
 }

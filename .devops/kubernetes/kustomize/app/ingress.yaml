@@ -6,7 +6,8 @@ metadata:
     nginx.ingress.kubernetes.io/enable-cors: "true"
 spec:
   rules:
-  - http:
+  - host: #appDomain#
+    http:
       paths:
       - path: /
         backend:

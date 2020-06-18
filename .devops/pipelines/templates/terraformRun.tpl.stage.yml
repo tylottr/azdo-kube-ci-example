@@ -28,7 +28,7 @@ parameters:
   default: ''
 - name: 'terraformDevopsEnvironment'
   type: 'string'
-  default: '$(Build.SourceBranchName)'
+  default: 'terraform'
 - name: 'terraformInputVariables'
   type: 'object'
   default: {}
@@ -48,11 +48,11 @@ stages:
     TF_IN_AUTOMATION: true
 
   jobs:
-  - job: 'validateTerraformConfiguration'
-    displayName: 'Validate Terraform Configuration'
-  
+
+  - job: 'runTerraformPlan'
+    displayName: 'Terraform Plan'
+
     steps:
-    - checkout: 'none'
     - task: Bash@3
       name: 'validateConfiguration'
       displayName: 'Validate Configuration'
@@ -72,13 +72,6 @@ stages:
         azureSubscription: '${{ parameters.azureSubscription }}'
         terraformStorageAccount: '${{ parameters.terraformStorageAccount }}'
 
-  - job: 'runTerraformPlan'
-    displayName: 'Terraform Plan'
-    dependsOn: 'validateTerraformConfiguration'
-    condition: succeeded('validateTerraformConfiguration')
-
-    steps:
-    - checkout: 'self'
     - template: '/.devops/pipelines/templates/terraformInitAzure.tpl.steps.yml'
       parameters:
         terraformVersion: '${{ parameters.terraformVersion }}'

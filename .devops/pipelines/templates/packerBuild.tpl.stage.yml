@@ -30,11 +30,11 @@ stages:
   condition: succeeded()
 
   jobs:
-  - job: 'validateBuildConfiguration'
-    displayName: 'Validate Build Configuration'
+  - job: 'buildImage'
+    displayName: 'Build Image'
 
     steps:
-    - checkout: 'none'
+    - checkout: 'self'
     - task: Bash@3
       name: 'validateBuildConfiguration'
       displayName: 'Validate Build Configuration'
@@ -60,12 +60,6 @@ stages:
         packerAzureLocation: '${{ parameters.packerAzureLocation }}'
         packerAzureResourceGroup: '${{ parameters.packerAzureResourceGroup }}'
 
-  - job: buildImage
-    displayName: Build Image
-    dependsOn: 'validateBuildConfiguration'
-    condition: succeeded('validateBuildConfiguration')
-
-    steps:
     - task: Bash@3
       name: 'downloadPacker'
       displayName: 'Download Packer'

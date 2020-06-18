@@ -18,7 +18,6 @@ trigger:
 variables:
 - group: 'shared-app'
 ## Contains:
-## * agentPool
 ## * appBasePath
 ## * appDomain
 ## * appKustomizePath
@@ -31,7 +30,7 @@ variables:
   value: 'express'
 
 pool:
-  name: '$(agentPool)'
+  vmImage: 'ubuntu-latest'
 
 stages:
 - template: '/.devops/pipelines/templates/nodeJsNpmTest.tpl.stage.yml'

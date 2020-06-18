@@ -33,64 +33,58 @@ stages:
   condition: succeeded()
 
   jobs:
-  - job: 'validateReleaseConfiguration'
-    displayName: 'Validate Release Configuration'
-
-    steps:
-    - checkout: 'none'
-    - task: Bash@3
-      name: 'validateReleaseConfiguration'
-      displayName: 'Validate Release Configuration'
-      inputs:
-        targetType: 'inline'
-        script: |
-          if [ -z "$appName" ]; then
-            echo "##vso[task.logissue type=error]Missing or empty template parameter \"appName\""
-            echo "##vso[task.complete result=Failed]"
-          fi
-
-          if [ -z "$appDomain" ]; then
-            echo "##vso[task.logissue type=error]Missing or empty template parameter \"appDomain\""
-            echo "##vso[task.complete result=Failed]"
-          fi
-
-          if [ -z "$appContainerImage" ]; then
-            echo "##vso[task.logissue type=error]Missing or empty template parameter \"appContainerImage\""
-            echo "##vso[task.complete result=Failed]"
-          fi
-
-          if [ -z "$appKustomizePath" ]; then
-            echo "##vso[task.logissue type=error]Missing or empty template parameter \"appKustomizePath\""
-            echo "##vso[task.complete result=Failed]"
-          fi
-
-          if [ -z "$kubernetesEnvironment" ]; then
-            echo "##vso[task.logissue type=error]Missing or empty template parameter \"kubernetesEnvironment\""
-            echo "##vso[task.complete result=Failed]"
-          fi
-
-          if [ -z "$kubernetesResource" ]; then
-            echo "##vso[task.logissue type=error]Missing or empty template parameter \"kubernetesResource\""
-            echo "##vso[task.complete result=Failed]"
-          fi
-      env:
-        appName: '${{ parameters.appName }}'
-        appDomain: '${{ parameters.appDomain }}'
-        appContainerImage: '${{ parameters.appContainerImage }}'
-        appKustomizePath: '${{ parameters.appKustomizePath }}'
-        kubernetesEnvironment: '${{ parameters.kubernetesEnvironment }}'
-        kubernetesResource: '${{ parameters.kubernetesResource }}'
-
   - deployment: 'deployToKubernetes'
     displayName: 'Deploy to Kubernetes'
     environment: '${{ parameters.kubernetesEnvironment }}.${{ parameters.kubernetesResource }}'
-    dependsOn: 'validateReleaseConfiguration'
-    condition: succeeded('validateReleaseConfiguration')
 
     strategy:
       runOnce:
         deploy:
           steps:
+          - checkout: 'self'
+          - task: Bash@3
+            name: 'validateReleaseConfiguration'
+            displayName: 'Validate Release Configuration'
+            inputs:
+              targetType: 'inline'
+              script: |
+                if [ -z "$appName" ]; then
+                  echo "##vso[task.logissue type=error]Missing or empty template parameter \"appName\""
+                  echo "##vso[task.complete result=Failed]"
+                fi
+
+                if [ -z "$appDomain" ]; then
+                  echo "##vso[task.logissue type=error]Missing or empty template parameter \"appDomain\""
+                  echo "##vso[task.complete result=Failed]"
+                fi
+
+                if [ -z "$appContainerImage" ]; then
+                  echo "##vso[task.logissue type=error]Missing or empty template parameter \"appContainerImage\""
+                  echo "##vso[task.complete result=Failed]"
+                fi
+
+                if [ -z "$appKustomizePath" ]; then
+                  echo "##vso[task.logissue type=error]Missing or empty template parameter \"appKustomizePath\""
+                  echo "##vso[task.complete result=Failed]"
+                fi
+
+                if [ -z "$kubernetesEnvironment" ]; then
+                  echo "##vso[task.logissue type=error]Missing or empty template parameter \"kubernetesEnvironment\""
+                  echo "##vso[task.complete result=Failed]"
+                fi
+
+                if [ -z "$kubernetesResource" ]; then
+                  echo "##vso[task.logissue type=error]Missing or empty template parameter \"kubernetesResource\""
+                  echo "##vso[task.complete result=Failed]"
+                fi
+            env:
+              appName: '${{ parameters.appName }}'
+              appDomain: '${{ parameters.appDomain }}'
+              appContainerImage: '${{ parameters.appContainerImage }}'
+              appKustomizePath: '${{ parameters.appKustomizePath }}'
+              kubernetesEnvironment: '${{ parameters.kubernetesEnvironment }}'
+              kubernetesResource: '${{ parameters.kubernetesResource }}'
+
           - task: KubectlInstaller@0
             name: 'install'
             displayName: 'Install Kubectl'
@@ -99,16 +93,21 @@ stages:
               
           - task: Bash@3
             name: 'kustomize'
-            displayName: 'Set up Kustomize file using yq'
+            displayName: 'Set up Kustomize file using sed'
             inputs:
               targetType: 'inline'
               script: |
-                yq write --inplace kustomization.yaml 'namePrefix' "${appName}-"
-                yq write --inplace kustomization.yaml 'commonLabels.app' "${appName}"
-                yq write --inplace kustomization.yaml 'images[0].newName' "${appContainerImage}"
-                yq write --inplace kustomization.yaml 'images[0].newTag' "${appContainerTag}"
+                echo "Updating kustomization.yaml"
+                sed -i \
+                  -e "s;#appName#;$appName;g" \
+                  -e "s;#appContainerImage#;$appContainerImage;g" \
+                  -e "s;#appContainerTag#;$appContainerTag;g" \
+                  kustomization.yaml
 
-                yq write --inplace ingress.yaml 'spec.rules[0].host' "${appDomain}"
+                echo "Updating ingress.yaml"
+                sed -i \
+                  -e "s;#appDomain#;$appDomain;g" \
+                  ingress.yaml
               workingDirectory: '${{ parameters.appKustomizePath }}'
             env:
               appName: '${{ parameters.appName }}'

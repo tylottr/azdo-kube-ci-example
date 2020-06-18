@@ -14,7 +14,7 @@ trigger: 'none'
 #     - master
 #   paths:
 #     include:
-#     - 'infrastructure/terraform/kcidemo'
+#     - 'infrastructure/terraform/vmss'
 
 variables:
 - group: 'shared-terraform'
@@ -24,11 +24,11 @@ variables:
 ## * terraformWorkingDirectoryBase
 ## Set these variables on pipeline creation or uncomment and update in here if it will be static
 - name: 'templateName'
-  value: 'kcidemo'
+  value: 'vmss'
 # - name: 'terraformApply'
 #   value: 'false'
 # - name: 'terraformDestroy'
-#   value: 'false'
+#   value: false
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -43,40 +43,8 @@ stages:
     terraformStorageAccount: '$(terraformStorageAccount)'
     terraformApply: '$(terraformApply)'
     terraformInputVariables:
-      resource_group_name: '$(resourceGroupName)'
       resource_prefix: '$(resourcePrefix)'
-
-# This creates resources in the kcidemo namespace for us
-- stage: 'kubernetesConfigure'
-  displayName: 'Configure Kubernetes'
-  condition: succeeded()
-
-  jobs:
-  - job: 'createKCIResources'
-    displayName: 'Create KCI Resources'
-    steps:
-    - template: '/.devops/pipelines/templates/terraformInitAzure.tpl.steps.yml'
-      parameters:
-        terraformWorkingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
-        azureSubscription: '$(terraformAzureSubscription)'
-        terraformStorageAccount: '$(terraformStorageAccount)'
-
-    - task: KubectlInstaller@0
-      name: 'install'
-      displayName: 'Install Kubectl'
-
-    - task: Bash@3
-      name: 'createKubernetesResources'
-      displayName: 'Create Kubernetes resources'
-      inputs:
-        targetType: 'inline'
-        script: |
-          terraform output aks_config > config
-          kubectl apply --kubeconfig config -f ../../kubernetes/kcidemo
-          rm -f config
-        workingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
-      env:
-        ARM_SAS_TOKEN: '$(ARM_SAS_TOKEN)'
+      vm_azdo_source_image_id: '$(vmAzdoSourceImageId)'
 
 # Steps below will perform a DESTROY operation on existing infrastructure.
 - stage: 'terraformDestroy'
@@ -110,3 +78,4 @@ stages:
         ARM_SAS_TOKEN: '$(ARM_SAS_TOKEN)'
         TF_VAR_resource_group_name: '$(resourceGroupName)'
         TF_VAR_resource_prefix: '$(resourcePrefix)'
+        TF_VAR_vm_azdo_source_image_id: '$(vmAzdoSourceImageId)'

@@ -1,36 +1,45 @@
+#################
+# Resource Group
+#################
+resource "azurerm_resource_group" "main" {
+  name     = "${local.resource_prefix}-rg"
+  location = var.location
+  tags     = var.tags
+}
+
 ##########
 # SSH Key
 ##########
-resource "tls_private_key" "azdo" {
+resource "tls_private_key" "main" {
   algorithm = "RSA"
 }
 
 ##################
 # Virtual Network
 ##################
-resource "azurerm_virtual_network" "azdo" {
-  name                = "${var.resource_prefix}-azdo-vnet"
-  resource_group_name = data.azurerm_resource_group.main.name
+resource "azurerm_virtual_network" "main" {
+  name                = "${local.resource_prefix}-vnet"
+  resource_group_name = azurerm_resource_group.main.name
   location            = var.location
   tags                = var.tags
 
   address_space = ["10.10.0.0/24"]
 }
 
-resource "azurerm_subnet" "azdo" {
+resource "azurerm_subnet" "main" {
   name                = "azdo"
-  resource_group_name = data.azurerm_resource_group.main.name
+  resource_group_name = azurerm_resource_group.main.name
 
-  virtual_network_name = azurerm_virtual_network.azdo.name
-  address_prefixes     = [azurerm_virtual_network.azdo.address_space[0]]
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = [azurerm_virtual_network.main.address_space[0]]
 }
 
 ##########
 # Compute
 ##########
-resource "azurerm_linux_virtual_machine_scale_set" "azdo" {
-  name                = "${var.resource_prefix}-azdo-vmss"
-  resource_group_name = data.azurerm_resource_group.main.name
+resource "azurerm_linux_virtual_machine_scale_set" "main" {
+  name                = "${local.resource_prefix}-vmss"
+  resource_group_name = azurerm_resource_group.main.name
   location            = var.location
   tags                = var.tags
 

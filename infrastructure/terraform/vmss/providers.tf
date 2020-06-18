@@ -4,6 +4,7 @@ terraform {
 
   required_providers {
     azurerm = ">= 2.9"
+    tls     = ">= 2.1"
   }
 }
 

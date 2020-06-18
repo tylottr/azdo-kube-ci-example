@@ -55,7 +55,7 @@ az storage account create --resource-group $resourceGroup --name $storageAccount
 az storage container create --account-name $storageAccount --name tfstate
 ```
 
-### 2. Run Packer to build the DevOps Agent base image
+### 2. (OPTIONAL) Run Packer to build the DevOps Agent base image
 
 Packer configuration can be found under [infrastructure/packer/azdo-agent](infrastructure/packer/azdo-agent) for the agent.
 
@@ -100,12 +100,14 @@ Finally we will run through the Terraform workflow to create our environment.
 ```bash
 terraform init -backend-config="resource_group_name=$resourceGroup"
 terraform validate
-terraform plan -out tf.plan -var resource_group_name="$resourceGroup" -var vm_devops_source_image_id="$devopsImageId"
+terraform plan -out tf.plan -var resource_group_name="$resourceGroup"
 terraform apply tf.plan
 cd ../../..
 ```
 
-Once the apply step finishes you should have an AKS cluster, ACR and VMSS under your new resource group.
+Once the apply step finishes you should have an AKS cluster and ACR under your new resource group.
+
+> NOTE: This does not include VMSS agents. For this you can use [this](infrastructure/terraform/vmss/README.md) template.
 
 ### 4. Deploy the Kubernetes Manifests
 
@@ -201,6 +203,8 @@ The Kubernetes service connection is used to allow access into a Kubernetes clus
 
 ### DevOps Agents
 
+> NOTE: As pipeline runs are done using the hosted agents, this section is optional. If using VMSS-backed agents, you can use [this](infrastructure/terraform/vmss/README.md) template.
+
 DevOps Agents are supported through VMSS Orchestration which require dedicated node pools.
 
 To create a VMSS Agent Pool, we follow the below steps:
@@ -241,12 +245,11 @@ This example uses two variable groups in its configuration, which in the case of
 
 |Variable|Description|Variable Group|Value|
 |-|-|-|-|
-|agentPool|The Agent Pool to run the pipeline in|shared-app|`"kcidemo"`|
 |appBasePath|Base path of the applications being built in this repository starting from the repository root|shared-app|`"application"`|
 |appDomain|The domain of the application to be inserted into Ingress rules, prefixed with `appName.`|shared-app|`"www.example.com"`|
 |appKustomizePath|Path to the Kustomize folder used for the application starting from the repository root|shared-app|`".devops/kubernetes/kustomize/app"`|
 |containerRegistry|The FQDN of the Container Registry|shared-app|`"kcidemoaksacr.azurecr.io"`|
-|kubernetesEnvironment|The name of the environment being deployed to|shared-app|`"kcidemo-dev`"|
+|kubernetesEnvironment|The name of the environment being deployed to|shared-app|`"kcidemo`"|
 |kubernetesResource|The name of the resource being deployed to|shared-app|`"kcidemo"`|
 
 We can create and configure the variable group running the below commands
@@ -255,12 +258,11 @@ We can create and configure the variable group running the below commands
 # create "shared" variable group
 az pipelines variable-group create --project=kcidemo --name=shared-app \
   --variables \
-    agentPool=kcidemo \
     appBasePath=application \
     appDomain=www.example.com \
     appKustomizePath=.devops/kubernetes/kustomize/app \
     containerRegistry=kcidemoaksacr.azurecr.io \
-    kubernetesEnvironment=kcidemo-dev \
+    kubernetesEnvironment=kcidemo \
     kubernetesResource=kcidemo
 ```
 
@@ -268,7 +270,6 @@ az pipelines variable-group create --project=kcidemo --name=shared-app \
 
 |Variable|Description|Variable Group|Value|
 |-|-|-|-|
-|agentPool|The Agent Pool to run the pipeline in|shared-terraform|`"kcidemo"`|
 |terraformAzureSubscription|The service connection subscription to use for Terraform|shared-terraform|`"kcidemo"`|
 |terraformStorageAccount|The storage account used for Terraform state|shared-terraform|`"kcidemotfsa"`|
 |terraformWorkingDirectoryBase|The working directory base for Terraform|shared-terraform|`"infrastructure/terraform"`|
@@ -279,7 +280,6 @@ We can create and configure the variable group running the below commands
 # create "shared" variable group
 az pipelines variable-group create --project=kcidemo --name=shared-terraform \
   --variables \
-    agentPool=kcidemo \
     terraformAzureSubscription=kcidemo \
     terraformStorageAccount=kcidemotfsa \
     terraformWorkingDirectoryBase=infrastructure/terraform
@@ -289,7 +289,6 @@ az pipelines variable-group create --project=kcidemo --name=shared-terraform \
 
 |Variable|Description|Variable Group|Value|
 |-|-|-|-|
-|agentPool|The Agent Pool to run the pipeline in|shared-packer|`"kcidemo"`|
 |packerAzureSubscription|The service connection subscription to use for Packer|shared-packer|`"kcidemo"`|
 |packerWorkingDirectoryBase|The working directory base for Packer|shared-packer|`"infrastructure/packer"`|
 
@@ -299,7 +298,6 @@ We can create and configure the variable group running the below commands
 # create "shared" variable group
 az pipelines variable-group create --project=kube-ci-example --name=shared-packer \
   --variables \
-    agentPool=kcidemo \
     packerAzureSubscription=kcidemo \
     packerWorkingDirectoryBase=infrastructure/packer
 ```
@@ -356,15 +354,21 @@ Infrastructure as Code also supports the usage of pipelines for managing lifecyc
 Here we will create and configure our Terraform pipeline.
 
 ```bash
-az pipelines create --project=kcidemo --name=terraformci \
+az pipelines create --project=kcidemo --name=terraformaksci \
   --repository=kcidemo --branch=master --repository-type=tfsgit \
   --yml-path=infrastructure/terraform/kcidemo/azure-pipelines.yml --skip-run
 
-az pipelines variable create --project=kcidemo --pipeline-name=terraformci \
+az pipelines variable create --project=kcidemo --pipeline-name=terraformaksci \
   --name=terraformApply --value=false --allow-override
 
-az pipelines variable create --project=kcidemo --pipeline-name=terraformci \
+az pipelines variable create --project=kcidemo --pipeline-name=terraformaksci \
   --name=terraformDestroy --value=false --allow-override
+
+az pipelines variable create --project=kcidemo --pipeline-name=terraformaksci \
+  --name=resourcePrefix --value=kcidemo --allow-override
+
+az pipelines variable create --project=kcidemo --pipeline-name=terraformaksci \
+  --name=resourceGroupName --value=kcidemo-rg --allow-override
 ```
 
 And here we will create our Packer configuration.
