@@ -107,7 +107,7 @@ cd ../../..
 
 Once the apply step finishes you should have an AKS cluster and ACR under your new resource group.
 
-> NOTE: This does not include VMSS agents. For this you can use [this](infrastructure/terraform/vmss/README.md) template.
+> **NOTE:** This does not include VMSS agents. For this you can use [this](infrastructure/terraform/vmss/README.md) template. You will also have to configure the pipelines to use this agent pool.
 
 ### 4. Deploy the Kubernetes Manifests
 
@@ -203,7 +203,7 @@ The Kubernetes service connection is used to allow access into a Kubernetes clus
 
 ### DevOps Agents
 
-> NOTE: As pipeline runs are done using the hosted agents, this section is optional. If using VMSS-backed agents, you can use [this](infrastructure/terraform/vmss/README.md) template.
+> **NOTE:** As pipeline runs are done using the hosted agents, this section is optional. If using VMSS-backed agents, you can use [this](infrastructure/terraform/vmss/README.md) template.
 
 DevOps Agents are supported through VMSS Orchestration which require dedicated node pools.
 
