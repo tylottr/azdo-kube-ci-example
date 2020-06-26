@@ -29,8 +29,3 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
-
-variable "resource_group_name" {
-  description = "The premade resource group that will be deployed to."
-  type        = string
-}

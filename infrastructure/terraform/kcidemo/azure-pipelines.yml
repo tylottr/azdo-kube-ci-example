@@ -25,6 +25,8 @@ variables:
 ## Set these variables on pipeline creation or uncomment and update in here if it will be static
 - name: 'templateName'
   value: 'kcidemo'
+# - name: 'terraformAdditionalArgs'
+#   value: 'REPLACE_ME'
 # - name: 'terraformApply'
 #   value: 'false'
 # - name: 'terraformDestroy'
@@ -39,11 +41,12 @@ stages:
 - template: '/.devops/pipelines/templates/terraformRun.tpl.stage.yml'
   parameters:
     terraformWorkingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
+    terraformVersion: '0.12.28'
     azureSubscription: '$(terraformAzureSubscription)'
     terraformStorageAccount: '$(terraformStorageAccount)'
+    terraformAdditionalArgs: '-var-file tfvars/default.tfvars'
     terraformApply: '$(terraformApply)'
     terraformInputVariables:
-      resource_group_name: '$(resourceGroupName)'
       resource_prefix: '$(resourcePrefix)'
 
 # This creates resources in the kcidemo namespace for us
@@ -60,6 +63,7 @@ stages:
         terraformWorkingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
         azureSubscription: '$(terraformAzureSubscription)'
         terraformStorageAccount: '$(terraformStorageAccount)'
+        # Ensure terraformWorkspace is set here if set in the Apply section
 
     - task: KubectlInstaller@0
       name: 'install'
@@ -75,8 +79,6 @@ stages:
           kubectl apply --kubeconfig config -f ../../kubernetes/kcidemo
           rm -f config
         workingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
-      env:
-        ARM_SAS_TOKEN: '$(ARM_SAS_TOKEN)'
 
 # Steps below will perform a DESTROY operation on existing infrastructure.
 - stage: 'terraformDestroy'
@@ -100,13 +102,11 @@ stages:
       displayName: 'Terraform Destroy'
       inputs:
         targetType: 'inline'
-        script: 'terraform destroy -auto-approve'
+        script: 'terraform destroy -input=false -auto-approve'
         workingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
       env:
         ARM_TENANT_ID: '$(ARM_TENANT_ID)'
         ARM_SUBSCRIPTION_ID: '$(ARM_SUBSCRIPTION_ID)'
         ARM_CLIENT_ID: '$(ARM_CLIENT_ID)'
         ARM_CLIENT_SECRET: '$(ARM_CLIENT_SECRET)'
-        ARM_SAS_TOKEN: '$(ARM_SAS_TOKEN)'
-        TF_VAR_resource_group_name: '$(resourceGroupName)'
         TF_VAR_resource_prefix: '$(resourcePrefix)'

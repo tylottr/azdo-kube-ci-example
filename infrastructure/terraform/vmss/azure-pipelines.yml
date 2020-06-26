@@ -25,6 +25,8 @@ variables:
 ## Set these variables on pipeline creation or uncomment and update in here if it will be static
 - name: 'templateName'
   value: 'vmss'
+# - name: 'terraformAdditionalArgs'
+#   value: 'REPLACE_ME'
 # - name: 'terraformApply'
 #   value: 'false'
 # - name: 'terraformDestroy'
@@ -39,6 +41,7 @@ stages:
 - template: '/.devops/pipelines/templates/terraformRun.tpl.stage.yml'
   parameters:
     terraformWorkingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
+    terraformVersion: '0.12.28'
     azureSubscription: '$(terraformAzureSubscription)'
     terraformStorageAccount: '$(terraformStorageAccount)'
     terraformApply: '$(terraformApply)'
@@ -68,14 +71,12 @@ stages:
       displayName: 'Terraform Destroy'
       inputs:
         targetType: 'inline'
-        script: 'terraform destroy -auto-approve'
+        script: 'terraform destroy -input=false -auto-approve'
         workingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
       env:
         ARM_TENANT_ID: '$(ARM_TENANT_ID)'
         ARM_SUBSCRIPTION_ID: '$(ARM_SUBSCRIPTION_ID)'
         ARM_CLIENT_ID: '$(ARM_CLIENT_ID)'
         ARM_CLIENT_SECRET: '$(ARM_CLIENT_SECRET)'
-        ARM_SAS_TOKEN: '$(ARM_SAS_TOKEN)'
-        TF_VAR_resource_group_name: '$(resourceGroupName)'
         TF_VAR_resource_prefix: '$(resourcePrefix)'
         TF_VAR_vm_azdo_source_image_id: '$(vmAzdoSourceImageId)'

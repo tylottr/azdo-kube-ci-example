@@ -7,7 +7,7 @@
 parameters:
 - name: 'terraformVersion'
   type: 'string'
-  default: '0.12.26'
+  default: '0.12.28'
 - name: 'terraformWorkingDirectory'
   type: 'string'
   default: '$(Build.Repository.LocalPath)'
@@ -23,7 +23,7 @@ parameters:
 - name: 'terraformWorkspace'
   type: 'string'
   default: ''
-- name: 'terraformVariablesDirectory'
+- name: 'terraformAdditionalArgs'
   type: 'string'
   default: ''
 - name: 'terraformDevopsEnvironment'
@@ -87,10 +87,10 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          tfArgs="-out tf.plan"
+          tfArgs="-input=false -out tf.plan"
 
-          if [ ! -z "$terraformVariablesDirectory" ]; then
-            tfArgs="$tfArgs -var-file $terraformVariablesDirectory/$terraformWorkspace.tfvars"
+          if [ ! -z "$terraformAdditionalArgs" ]; then
+            tfArgs="$tfArgs $terraformAdditionalArgs"
           fi
 
           if [ "$terraformDestroy" == "true" ]; then
@@ -105,9 +105,7 @@ stages:
         ARM_SUBSCRIPTION_ID: '$(ARM_SUBSCRIPTION_ID)'
         ARM_CLIENT_ID: '$(ARM_CLIENT_ID)'
         ARM_CLIENT_SECRET: '$(ARM_CLIENT_SECRET)'
-        ARM_SAS_TOKEN: '$(ARM_SAS_TOKEN)'
-        terraformWorkspace: '${{ parameters.terraformWorkspace }}'
-        terraformVariablesDirectory: '${{ parameters.terraformVariablesDirectory }}'
+        terraformAdditionalArgs: '${{ parameters.terraformAdditionalArgs }}'
         terraformDestroy: '${{ parameters.terraformDestroy }}'
         ${{ each item in parameters.terraformInputVariables }}:
           TF_VAR_${{ item.key }}: ${{ item.value }}
@@ -121,7 +119,7 @@ stages:
 
 - stage: 'runTerraformPlanApply'
   displayName: 'Terraform Plan Apply'
-  condition: and(ne(variables['Build.Reason'], 'PullRequest'), eq(variables['terraformApply'], 'true'))
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), eq(variables['terraformApply'], 'true'))
   variables:
     TF_IN_AUTOMATION: true
 
@@ -162,5 +160,4 @@ stages:
               ARM_SUBSCRIPTION_ID: '$(ARM_SUBSCRIPTION_ID)'
               ARM_CLIENT_ID: '$(ARM_CLIENT_ID)'
               ARM_CLIENT_SECRET: '$(ARM_CLIENT_SECRET)'
-              ARM_SAS_TOKEN: '$(ARM_SAS_TOKEN)'
               terraformPlan: '$(Pipeline.Workspace)/tf.plan'

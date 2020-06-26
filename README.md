@@ -85,6 +85,8 @@ Next we update the _backend.tf file under this folder.
 
 > **NOTE:** `storage_account_name` should match the value in step 1. The file should look something like below.
 
+> **NOTE:** If using pipelines it may be best to leave `storage_account_name` unset as the pipeline templates set this value.
+
 ```hcl
 terraform {
   backend "azurerm" {
@@ -366,9 +368,6 @@ az pipelines variable create --project=kcidemo --pipeline-name=terraformaksci \
 
 az pipelines variable create --project=kcidemo --pipeline-name=terraformaksci \
   --name=resourcePrefix --value=kcidemo --allow-override
-
-az pipelines variable create --project=kcidemo --pipeline-name=terraformaksci \
-  --name=resourceGroupName --value=kcidemo-rg --allow-override
 ```
 
 And here we will create our Packer configuration.

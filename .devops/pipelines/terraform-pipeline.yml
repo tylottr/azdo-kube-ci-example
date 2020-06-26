@@ -26,10 +26,12 @@ variables:
 ## Set these variables on pipeline creation or uncomment and update in here if it will be static
 # - name: 'templateName'
 #   value: 'REPLACE_ME'
+# - name: 'terraformAdditionalArgs'
+#   value: 'REPLACE_ME'
 # - name: 'terraformApply'
-#   value: false
+#   value: 'false'
 # - name: 'terraformDestroy'
-#   value: false
+#   value: 'false'
 
 pool:
   name: '$(agentPool)'
@@ -40,9 +42,11 @@ stages:
 - template: '/.devops/pipelines/templates/terraformRun.tpl.stage.yml'
   parameters:
     terraformWorkingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
+    terraformVersion: '0.12.28'
     azureSubscription: '$(terraformAzureSubscription)'
     terraformStorageAccount: '$(terraformStorageAccount)'
     terraformWorkspace: ''
+    terraformAdditionalArgs: ''
     terraformApply: '$(terraformApply)'
     terraformDestroy: '$(terraformDestroy)'
     terraformInputVariables: {}
