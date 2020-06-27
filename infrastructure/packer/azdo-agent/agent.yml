@@ -1,0 +1,9 @@
+- hosts: all
+  become: true
+  
+  vars:
+    docker_maintenance_tasks: true
+    docker_prune_crontime: "30 8 * * 1,6"
+
+  roles:
+  - name: azdo-ubuntu-agent

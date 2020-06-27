@@ -1,0 +1,21 @@
+galaxy_info:
+  author: Tyla Boff
+  description: Installs software to allow a host to work as an Azure DevOps agent.
+  company:
+
+  license: MIT
+
+  min_ansible_version: 2.9
+
+  # If this a Container Enabled role, provide the minimum Ansible Container version.
+  # min_ansible_container_version:
+
+  platforms:
+  - name: Ubuntu
+    versions:
+    - 16.04
+    - 18.04
+
+  galaxy_tags: []
+
+dependencies: []

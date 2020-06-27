@@ -1,0 +1,44 @@
+---
+- name: "Install prerequisite packages"
+  apt:
+    update_cache: true
+    package:
+    - curl
+    - ca-certificates
+    - software-properties-common
+    - apt-transport-https
+    - lsb-release
+    - gnupg
+
+- name: "Add Universe repository"
+  apt_repository:
+    repo: "deb http://archive.ubuntu.com/ubuntu/ {{ ansible_distribution_release }} universe"
+
+- name: "Add Microsoft repository key"
+  apt_key:
+    url: https://packages.microsoft.com/keys/microsoft.asc
+  register: add_microsoft_repository_key
+  until: add_microsoft_repository_key is not failed
+  retries: 3
+- name: "Add Microsoft repository"
+  apt_repository:
+    repo: >
+      deb
+      https://packages.microsoft.com/{{ ansible_distribution | lower }}/{{ ansible_distribution_version }}/prod
+      {{ ansible_distribution_release }}
+      main
+- name: "Add azure-cli repository"
+  apt_repository:
+    repo: >
+      deb
+      https://packages.microsoft.com/repos/azure-cli/
+      {{ ansible_distribution_release }}
+      main
+
+- name: "Update Apt cache"
+  apt:
+    update_cache: true
+
+- name: "Install packages"
+  apt:
+    package: "{{ base_packages + additional_packages }}"

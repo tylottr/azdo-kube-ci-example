@@ -1,0 +1,46 @@
+---
+- name: "Create Azure DevOps Agent group"
+  group:
+    name: "{{ azdo_agent_user }}"
+- name: "Create Azure DevOps Agent user"
+  user:
+    name: "{{ azdo_agent_user }}"
+    comment: "Azure DevOps Pipeline Agent"
+    group: "{{ azdo_agent_user }}"
+    groups:
+    - docker
+    home: "/home/{{ azdo_agent_user }}"
+    shell: /bin/bash
+
+- name: "Unarchive Azure DevOps Agent installer"
+  unarchive:
+    src: "https://vstsagentpackage.azureedge.net/agent/{{ azdo_agent_version }}/vsts-agent-linux-x64-{{ azdo_agent_version }}.tar.gz"
+    remote_src: true
+    dest: "/home/{{ azdo_agent_user }}"
+    owner: "{{ azdo_agent_user }}"
+    group: "{{ azdo_agent_user }}"
+
+- name: "Validate Azure DevOps settings"
+  assert:
+    that:
+    - azdo_agent_organization | length > 0
+    - azdo_agent_token | length > 0
+
+- name: "Install Azure DevOps dependencies"
+  command:
+    cmd: ./bin/installdependencies.sh
+    chdir: "/home/{{ azdo_agent_user }}"
+    creates: "/home/{{ azdo_agent_user }}/.agent"
+
+- name: "Register Azure DevOps Agent"
+  command:
+    cmd: ./config.sh --unattended --acceptTeeEula --replace
+    chdir: "/home/{{ azdo_agent_user }}"
+    creates: "/home/{{ azdo_agent_user }}/.agent"
+  environment:
+    VSTS_AGENT_INPUT_URL: "{{ azdo_agent_organization_url }}"
+    VSTS_AGENT_INPUT_POOL: "{{ azdo_agent_pool }}"
+    VSTS_AGENT_INPUT_AUTH: pat
+    VSTS_AGENT_INPUT_TOKEN: "{{ azdo_agent_token }}"
+  become: true
+  become_user: "{{ azdo_agent_user }}"

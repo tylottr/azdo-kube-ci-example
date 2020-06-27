@@ -1,0 +1,11 @@
+---
+additional_packages: []
+
+docker_maintenance_tasks: true
+docker_prune_crontime: "30 8 * * 1,6"
+
+azdo_agent_install: false
+azdo_agent_version: "2.171.1"
+azdo_agent_pool: "Default"
+azdo_agent_organization: ""
+azdo_agent_token: ""

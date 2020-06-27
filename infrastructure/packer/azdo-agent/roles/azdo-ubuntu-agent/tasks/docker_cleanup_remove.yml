@@ -1,0 +1,9 @@
+---
+- name: "Remove cronjob 'docker_prune'"
+  file:
+    path: /etc/cron.d/docker_prune
+    state: absent
+- name: "Remove Docker cleanup user"
+  user:
+    name: "{{ docker_cleanup_user }}"
+    state: absent

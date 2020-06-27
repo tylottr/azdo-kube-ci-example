@@ -1,0 +1,27 @@
+---
+base_packages:
+- vim
+- zip
+- git
+- jq
+- bats
+- powershell
+- azure-cli
+- ansible
+- docker.io
+- python
+- python-pip
+- python-pytest
+- python3
+- python3-pip
+- python3-pytest
+- nodejs
+- npm
+- golang
+- dotnet-sdk-3.1
+- aspnetcore-runtime-3.1
+
+docker_cleanup_user: docker_janitor
+
+azdo_agent_user: azdo
+azdo_agent_organization_url: "https://dev.azure.com/{{ azdo_agent_organization }}"

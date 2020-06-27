@@ -1,0 +1,16 @@
+---
+- name: "Create Docker cleanup user"
+  user:
+    name: "{{ docker_cleanup_user }}"
+    comment: "User designed to perform docker_prune tasks on schedule"
+    group: docker
+    shell: /bin/false
+    system: true
+    create_home: false
+- name: "Create cronjob 'docker_prune'"
+  template:
+    src: docker_prune.j2
+    dest: /etc/cron.d/docker_prune
+    mode: 0644
+    owner: root
+    group: root

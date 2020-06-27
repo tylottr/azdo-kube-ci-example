@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include azdo-ubuntu-agent"
+      include_role:
+        name: "azdo-ubuntu-agent"
