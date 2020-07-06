@@ -49,7 +49,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
   admin_username = "vmadmin"
   admin_ssh_key {
     username   = "vmadmin"
-    public_key = tls_private_key.azdo.public_key_openssh
+    public_key = tls_private_key.main.public_key_openssh
   }
 
   source_image_id = var.vm_azdo_source_image_id
@@ -67,7 +67,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
     ip_configuration {
       name      = "ipconfig"
       primary   = true
-      subnet_id = azurerm_subnet.azdo.id
+      subnet_id = azurerm_subnet.main.id
     }
   }
 

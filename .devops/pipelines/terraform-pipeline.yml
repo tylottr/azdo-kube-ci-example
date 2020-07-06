@@ -20,8 +20,9 @@ variables:
 - group: 'shared-terraform'
 ## Contains:
 ## * agentPool
+## * terraformStateSubscriptionName
+## * terraformStateStorageAccountName
 ## * terraformAzureSubscription
-## * terraformStorageAccount
 ## * terraformWorkingDirectoryBase
 ## Set these variables on pipeline creation or uncomment and update in here if it will be static
 # - name: 'templateName'
@@ -41,12 +42,13 @@ stages:
 # This cannot be reused due to jobs requiring unique names.
 - template: '/.devops/pipelines/templates/terraformRun.tpl.stage.yml'
   parameters:
-    terraformWorkingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
     terraformVersion: '0.12.28'
-    azureSubscription: '$(terraformAzureSubscription)'
-    terraformStorageAccount: '$(terraformStorageAccount)'
+    terraformWorkingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
+    terraformStateAzureSubscriptionName: '$(terraformStateAzureSubscriptionName)'
+    terraformStateStorageAccountName: '$(terraformStateStorageAccountName)'
     terraformWorkspace: ''
+    azureSubscription: '$(terraformAzureSubscription)'
     terraformAdditionalArgs: ''
+    terraformInputVariables: {}
     terraformApply: '$(terraformApply)'
     terraformDestroy: '$(terraformDestroy)'
-    terraformInputVariables: {}

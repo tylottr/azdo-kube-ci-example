@@ -19,12 +19,13 @@ trigger: 'none'
 variables:
 - group: 'shared-terraform'
 ## Contains:
+## * terraformStateSubscriptionName
+## * terraformStateStorageAccountName
 ## * terraformAzureSubscription
-## * terraformStorageAccount
 ## * terraformWorkingDirectoryBase
 ## Set these variables on pipeline creation or uncomment and update in here if it will be static
 - name: 'templateName'
-  value: 'vmss'
+  value: 'azdo-vmss'
 # - name: 'terraformAdditionalArgs'
 #   value: 'REPLACE_ME'
 # - name: 'terraformApply'
@@ -41,33 +42,34 @@ stages:
 - template: '/.devops/pipelines/templates/terraformRun.tpl.stage.yml'
   parameters:
     terraformWorkingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
-    terraformVersion: '0.12.28'
+    terraformStateAzureSubscriptionName: '$(terraformStateAzureSubscriptionName)'
+    terraformStateStorageAccountName: '$(terraformStateStorageAccountName)'
     azureSubscription: '$(terraformAzureSubscription)'
-    terraformStorageAccount: '$(terraformStorageAccount)'
     terraformApply: '$(terraformApply)'
     terraformInputVariables:
       resource_prefix: '$(resourcePrefix)'
       vm_azdo_source_image_id: '$(vmAzdoSourceImageId)'
 
 # Steps below will perform a DESTROY operation on existing infrastructure.
-- stage: 'terraformDestroy'
+- stage: 'destroy'
   displayName: 'Terraform Destroy'
   condition: and(always(), eq(variables['terraformDestroy'], 'true'))
   variables:
     TF_IN_AUTOMATION: true
 
   jobs:
-  - job: 'runTerraformDestroy'
+  - job: 'destroy'
     displayName: 'Terraform Destroy'
     steps:
     - template: '/.devops/pipelines/templates/terraformInitAzure.tpl.steps.yml'
       parameters:
         terraformWorkingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
+        terraformStateAzureSubscriptionName: '$(terraformStateAzureSubscriptionName)'
+        terraformStateStorageAccountName: '$(terraformStateStorageAccountName)'
         azureSubscription: '$(terraformAzureSubscription)'
-        terraformStorageAccount: '$(terraformStorageAccount)'
 
     - task: Bash@3
-      name: 'terraformDestroy'
+      name: 'destroy'
       displayName: 'Terraform Destroy'
       inputs:
         targetType: 'inline'

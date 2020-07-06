@@ -33,10 +33,65 @@ pool:
   vmImage: 'ubuntu-latest'
 
 stages:
-- template: '/.devops/pipelines/templates/nodeJsNpmTest.tpl.stage.yml'
-  parameters:
-    appName: '$(appName)'
-    appBasePath: '$(appBasePath)/$(appName)'
+- stage: 'test'
+  displayName: 'Test Application'
+  condition: succeeded()
+  variables:
+    nodeVersion: '10.x'
+    testResultsFormat: 'JUnit'
+
+  jobs:
+  - job: 'lint'
+    displayName: 'Lint'
+    steps:
+    - checkout: 'self'
+    - task: UseNode@1
+      inputs:
+        version: '$(nodeVersion)'
+
+    - task: Bash@3
+      name: 'lint'
+      displayName: 'Lint'
+      inputs:
+        targetType: 'inline'
+        script: 'npm ci; npm run lint:ci'
+        workingDirectory: '$(appBasePath)/$(appName)'
+    - task: PublishTestResults@2
+      name: 'publishLintingResults'
+      displayName: 'Publish Linting Results'
+      condition: succeededOrFailed()
+      inputs:
+        testRunTitle: 'Lint: $(appName)'
+        failTaskOnFailedTests: true
+        buildConfiguration: '$(appName):lint:$(Build.SourceBranchName)-$(Build.BuildId)'
+        testResultsFormat: '$(testResultsFormat)'
+        testResultsFiles: '$(appBasePath)/$(appName)/lint.xml'
+
+  - job: 'unit'
+    displayName: 'Unit Test'
+    steps:
+    - checkout: 'self'
+    - task: UseNode@1
+      inputs:
+        version: '$(nodeVersion)'
+
+    - task: Bash@3
+      name: 'unit'
+      displayName: 'Unit Test'
+      inputs:
+        targetType: 'inline'
+        script: 'npm ci; npm run test:ci'
+        workingDirectory: '$(appBasePath)/$(appName)'
+    - task: PublishTestResults@2
+      name: 'publishUnitTestResults'
+      displayName: 'Publish Unit Test Results'
+      condition: succeededOrFailed()
+      inputs:
+        testRunTitle: 'Unit: $(appName)'
+        failTaskOnFailedTests: true
+        buildConfiguration: '$(appName):unit:$(Build.SourceBranchName)-$(Build.BuildId)'
+        testResultsFormat: '$(testResultsFormat)'
+        testResultsFiles: '$(appBasePath)/$(appName)/test-results.xml'
   
 - template: '/.devops/pipelines/templates/dockerBuild.tpl.stage.yml'
   parameters:

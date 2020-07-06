@@ -19,19 +19,19 @@ parameters:
   default: []
 
 stages:
-- stage: 'buildAndPushDockerContainerImage'
-  displayName: 'Build and Push Docker Container Image'
+- stage: 'buildAndPush'
+  displayName: 'Build and Push'
   condition: succeeded()
 
   jobs:
-  - job: 'buildAndPushDockerContainerImage'
-    displayName: 'Build and Push Docker Container Image'
+  - job: 'buildAndPush'
+    displayName: 'Build and Push'
 
     steps:
     - checkout: 'self'
     - task: Bash@3
-      name: 'validateBuildConfiguration'
-      displayName: 'Validate Build Configuration'
+      name: 'validateStage'
+      displayName: 'Validate Stage'
       inputs:
         targetType: 'inline'
         script: |
@@ -59,8 +59,8 @@ stages:
           ${{ pair.key }}: ${{ pair.value }}
 
     - task: Docker@2
-      name: 'buildAndPushImage'
-      displayName: 'Build and Push the Docker Container image'
+      name: 'buildAndPush'
+      displayName: 'Build and Push'
       inputs:
         containerRegistry: '${{ parameters.containerRegistry }}'
         repository: '${{ parameters.appName }}'

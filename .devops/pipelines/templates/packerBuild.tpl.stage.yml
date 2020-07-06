@@ -25,19 +25,19 @@ parameters:
   default: ''
 
 stages:
-- stage: 'buildImage'
+- stage: 'build'
   displayName: 'Build Image'
   condition: succeeded()
 
   jobs:
-  - job: 'buildImage'
+  - job: 'build'
     displayName: 'Build Image'
 
     steps:
     - checkout: 'self'
     - task: Bash@3
-      name: 'validateBuildConfiguration'
-      displayName: 'Validate Build Configuration'
+      name: 'validateStage'
+      displayName: 'Validate Stage'
       inputs:
         targetType: 'inline'
         script: |
@@ -61,7 +61,7 @@ stages:
         packerAzureResourceGroup: '${{ parameters.packerAzureResourceGroup }}'
 
     - task: Bash@3
-      name: 'downloadPacker'
+      name: 'download'
       displayName: 'Download Packer'
       inputs:
         targetType: 'inline'
@@ -75,8 +75,8 @@ stages:
         packerVersion: '${{ parameters.packerVersion }}'
 
     - task: AzureCLI@2
-      name: 'initializeBuild'
-      displayName: 'Initialize Build'
+      name: 'setup'
+      displayName: 'Setup Build'
       inputs:
         azureSubscription: '${{ parameters.azureSubscription }}'
         scriptType: 'bash'
@@ -101,8 +101,8 @@ stages:
         packerAzureResourceGroup: '${{ parameters.packerAzureResourceGroup }}'
 
     - task: Bash@3
-      name: 'runBuild'
-      displayName: 'Run Build'
+      name: 'build'
+      displayName: 'Build Image'
       inputs:
         targetType: 'inline'
         script: './packer build -var-file parameters.json agent.json'

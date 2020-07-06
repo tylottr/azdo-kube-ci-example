@@ -33,15 +33,13 @@ pool:
   vmImage: 'ubuntu-latest'
 
 stages:
-- stage: 'testFlaskApplication'
-  displayName: 'Test Flask Application'
+- stage: 'test'
+  displayName: 'Test Application'
   jobs:
-  - job: 'lintTest'
-    displayName: 'Run Lint Test'
-
+  - job: 'lint'
+    displayName: 'Lint'
     steps:
     - checkout: 'self'
-
     - task: UsePythonVersion@0
       inputs:
         versionSpec: '3.x'
@@ -56,20 +54,20 @@ stages:
         workingDirectory: '$(appBasePath)/$(appName)'
 
     - task: Bash@3
-      name: 'runLintTest'
-      displayName: 'Run Lint Test'
+      name: 'lint'
+      displayName: 'Lint'
       inputs:
         targetType: 'inline'
         script: 'pylint *.py -f pylint_junit.JUnitReporter | tee lint.xml'
         workingDirectory: '$(appBasePath)/$(appName)'
     - task: PublishTestResults@2
       name: 'publishLintingResults'
-      displayName: 'Publish Linting Results'
+      displayName: 'Publish Lint Results'
       condition: succeededOrFailed()
       inputs:
-        testRunTitle: '$(appName) Linting'
+        testRunTitle: 'Lint: $(appName)'
         failTaskOnFailedTests: true
-        buildConfiguration: '$(appName):$(Build.SourceBranchName)-$(Build.BuildId)'
+        buildConfiguration: '$(appName):lint:$(Build.SourceBranchName)-$(Build.BuildId)'
         testResultsFormat: 'JUnit'
         testResultsFiles: '$(appBasePath)/$(appName)/lint.xml'
 

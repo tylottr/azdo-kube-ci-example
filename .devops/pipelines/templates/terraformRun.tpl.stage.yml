@@ -11,27 +11,30 @@ parameters:
 - name: 'terraformWorkingDirectory'
   type: 'string'
   default: '$(Build.Repository.LocalPath)'
-- name: 'azureSubscription'
+- name: 'terraformStateAzureSubscriptionName'
   type: 'string'
   default: ''
-- name: 'terraformStorageAccount'
+- name: 'terraformStateStorageAccountName'
+  type: 'string'
+  default: ''
+- name: 'terraformWorkspace'
   type: 'string'
   default: ''
 - name: 'sasTokenDuration'
   type: 'string'
   default: '2 hours'
-- name: 'terraformWorkspace'
+- name: 'azureSubscription'
   type: 'string'
   default: ''
 - name: 'terraformAdditionalArgs'
   type: 'string'
   default: ''
-- name: 'terraformDevopsEnvironment'
-  type: 'string'
-  default: 'terraform'
 - name: 'terraformInputVariables'
   type: 'object'
   default: {}
+- name: 'terraformDevopsEnvironment'
+  type: 'string'
+  default: 'terraform_apply'
 - name: 'terraformApply'
   type: 'string'
   default: 'false'
@@ -41,21 +44,20 @@ parameters:
 
 
 stages:
-- stage: 'runTerraformPlan'
+- stage: 'terraformPlan'
   displayName: 'Terraform Plan'
   condition: succeeded()
   variables:
     TF_IN_AUTOMATION: true
 
   jobs:
-
-  - job: 'runTerraformPlan'
+  - job: 'terraformPlan'
     displayName: 'Terraform Plan'
 
     steps:
     - task: Bash@3
-      name: 'validateConfiguration'
-      displayName: 'Validate Configuration'
+      name: 'validateStage'
+      displayName: 'Validate Stage'
       inputs:
         targetType: 'inline'
         script: |
@@ -64,25 +66,26 @@ stages:
             echo "##vso[task.complete result=Failed]"
           fi
 
-          if [ -z "$terraformStorageAccount" ]; then
-            echo "##vso[task.logissue type=error]Missing or empty template parameter \"terraformStorageAccount\""
+          if [ -z "$terraformStateStorageAccountName" ]; then
+            echo "##vso[task.logissue type=error]Missing or empty template parameter \"terraformStateStorageAccountName\""
             echo "##vso[task.complete result=Failed]"
           fi
       env:
         azureSubscription: '${{ parameters.azureSubscription }}'
-        terraformStorageAccount: '${{ parameters.terraformStorageAccount }}'
+        terraformStateStorageAccountName: '${{ parameters.terraformStateStorageAccountName }}'
 
     - template: '/.devops/pipelines/templates/terraformInitAzure.tpl.steps.yml'
       parameters:
         terraformVersion: '${{ parameters.terraformVersion }}'
         terraformWorkingDirectory: '${{ parameters.terraformWorkingDirectory }}'
-        azureSubscription: '${{ parameters.azureSubscription }}'
-        terraformStorageAccount: '${{ parameters.terraformStorageAccount }}'
-        sasTokenDuration: '${{ parameters.sasTokenDuration }}'
+        terraformStateAzureSubscriptionName: '${{ parameters.terraformStateAzureSubscriptionName }}'
+        terraformStateStorageAccountName: '${{ parameters.terraformStateStorageAccountName }}'
         terraformWorkspace: '${{ parameters.terraformWorkspace }}'
+        sasTokenDuration: '${{ parameters.sasTokenDuration }}'
+        azureSubscription: '${{ parameters.azureSubscription }}'
 
     - task: Bash@3
-      name: 'terraformPlan'
+      name: 'plan'
       displayName: 'Terraform Plan'
       inputs:
         targetType: 'inline'
@@ -111,20 +114,21 @@ stages:
           TF_VAR_${{ item.key }}: ${{ item.value }}
 
     - task: PublishPipelineArtifact@1
+      name: 'upload'
       displayName: 'Upload plan'
-      condition: ne(variables['Build.Reason'], 'PullRequest')
+      condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
       inputs:
         targetPath: '${{ parameters.terraformWorkingDirectory }}/tf.plan'
         artifactName: 'plan'
 
-- stage: 'runTerraformPlanApply'
+- stage: 'terraformPlanApply'
   displayName: 'Terraform Plan Apply'
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), eq(variables['terraformApply'], 'true'))
   variables:
     TF_IN_AUTOMATION: true
 
   jobs:
-  - deployment: 'runTerraformPlanApply'
+  - deployment: 'terraformApply'
     displayName: 'Terraform Plan Apply'
     environment: '${{ parameters.terraformDevopsEnvironment }}'
 
@@ -137,19 +141,20 @@ stages:
             parameters:
               terraformVersion: '${{ parameters.terraformVersion }}'
               terraformWorkingDirectory: '${{ parameters.terraformWorkingDirectory }}'
-              azureSubscription: '${{ parameters.azureSubscription }}'
-              terraformStorageAccount: '${{ parameters.terraformStorageAccount }}'
-              sasTokenDuration: '${{ parameters.sasTokenDuration }}'
+              terraformStateAzureSubscriptionName: '${{ parameters.terraformStateAzureSubscriptionName }}'
+              terraformStateStorageAccountName: '${{ parameters.terraformStateStorageAccountName }}'
               terraformWorkspace: '${{ parameters.terraformWorkspace }}'
+              sasTokenDuration: '${{ parameters.sasTokenDuration }}'
+              azureSubscription: '${{ parameters.azureSubscription }}'
 
           - task: DownloadPipelineArtifact@2
-            name: 'downloadPlan'
+            name: 'download'
             displayName: 'Download plan'
             inputs:
               artifact: 'plan'
 
           - task: Bash@3
-            name: 'terraformApply'
+            name: 'apply'
             displayName: 'Terraform Apply'
             inputs:
               targetType: 'inline'

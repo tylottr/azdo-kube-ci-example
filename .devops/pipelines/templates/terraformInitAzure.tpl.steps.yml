@@ -14,29 +14,32 @@ parameters:
 - name: 'terraformWorkingDirectory'
   type: 'string'
   default: '$(Build.Repository.LocalPath)'
-- name: 'azureSubscription'
+- name: 'terraformStateAzureSubscriptionName'
   type: 'string'
   default: ''
-- name: 'terraformStorageAccount'
+- name: 'terraformStateStorageAccountName'
+  type: 'string'
+  default: ''
+- name: 'terraformWorkspace'
   type: 'string'
   default: ''
 - name: 'sasTokenDuration'
   type: 'string'
   default: '2 hours'
-- name: 'terraformWorkspace'
+- name: 'azureSubscription'
   type: 'string'
   default: ''
 
 steps:
 - task: TerraformInstaller@0
-  name: 'terraformInstall'
+  name: 'install'
   displayName: 'Install Terraform'
   inputs:
     terraformVersion: '${{ parameters.terraformVersion }}'
 
 - task: AzureCLI@2
-  name: 'terraformSetup'
-  displayName: 'Set variables for Terraform'
+  name: 'setup'
+  displayName: 'Configure Terraform Authentication'
   inputs:
     azureSubscription: '${{ parameters.azureSubscription }}'
     scriptType: 'bash'
@@ -44,7 +47,9 @@ steps:
     inlineScript: |
       echo "Generating SAS token"
       end=`date --date "now + $sasTokenDuration" --utc "+%Y-%m-%dT%H:%MZ"`
-      sas=`az storage container generate-sas --name tfstate --expiry $end --https-only --permissions acdlrw --output tsv`
+      sas=`az storage container generate-sas --name tfstate \
+        --expiry $end --https-only --permissions acdlrw --output tsv \
+        --subscription "$terraformStateAzureSubscriptionName"`
       echo "##vso[task.setvariable variable=ARM_SAS_TOKEN;issecret=true]$sas"
 
       echo "Setting authentication details"
@@ -55,12 +60,13 @@ steps:
     workingDirectory: '${{ parameters.terraformWorkingDirectory }}'
     addSpnToEnvironment: true
   env:
-    AZURE_STORAGE_AUTH_MODE: 'key'
-    AZURE_STORAGE_ACCOUNT: '${{ parameters.terraformStorageAccount }}'
+    # AZURE_STORAGE_AUTH_MODE: 'login'
+    AZURE_STORAGE_ACCOUNT: '${{ parameters.terraformStateStorageAccountName }}'
+    terraformStateAzureSubscriptionName: '${{ parameters.terraformStateAzureSubscriptionName }}'
     sasTokenDuration: "${{ parameters.sasTokenDuration }}"
 
 - task: Bash@3
-  name: 'terraformInit'
+  name: 'init'
   displayName: 'Terraform Init'
   inputs:
     targetType: 'inline'
@@ -75,11 +81,11 @@ steps:
     workingDirectory: '${{ parameters.terraformWorkingDirectory }}'
   env:
     ARM_SAS_TOKEN: '$(ARM_SAS_TOKEN)'
-    AZURE_STORAGE_ACCOUNT: '${{ parameters.terraformStorageAccount }}'
+    AZURE_STORAGE_ACCOUNT: '${{ parameters.terraformStateStorageAccountName }}'
     terraformWorkspace: '${{ parameters.terraformWorkspace }}'
 
 - task: Bash@3
-  name: 'terraformValidate'
+  name: 'validate'
   displayName: 'Terraform Validate'
   inputs:
     targetType: 'inline'

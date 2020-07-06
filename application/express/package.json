@@ -9,7 +9,7 @@
     "test": "mocha --colors --exit --recursive ./tests",
     "test:ci": "mocha --exit --reporter mocha-junit-reporter --recursive ./tests",
     "lint": "eslint . --ext .js",
-    "lint:ci": "eslint --format junit --output-file lint-results.xml . --ext .js"
+    "lint:ci": "eslint --format junit --output-file lint.xml . --ext .js"
   },
   "keywords": [],
   "author": "",
