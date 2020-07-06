@@ -9,7 +9,7 @@ HOST = environ.get("ADDRESS") or "0.0.0.0"
 PORT = environ.get("PORT") or 3000
 
 # Configure env vars
-NAME = environ.get("NAME") or "unnamed"
+APP_NAME = environ.get("APP_NAME") or "unnamed"
 
 # Routes
 @app.route("/")
@@ -17,7 +17,7 @@ def index():
     return dumps({
       "sourceRepo": "kube-ci-example",
       "language": "python",
-      "appName": NAME
+      "appName": APP_NAME
     })
 
 @app.route("/health")

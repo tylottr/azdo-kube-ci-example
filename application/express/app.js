@@ -16,7 +16,7 @@ app.set("port", process.env.PORT || 3000);
 /**
  * Configure env vars
  */
-const NAME = process.env.NAME || "unnamed";
+const APP_NAME = process.env.APP_NAME || "unnamed";
 
 /**
  * Configure middleware
@@ -30,7 +30,7 @@ app.get("/", (req, res) => {
   res.send({
     sourceRepo: "kube-ci-example",
     language: "javascript",
-    appName: NAME
+    appName: APP_NAME
   });
 });
 
