@@ -11,11 +11,11 @@ from flask import Flask
 app = Flask(__name__)
 
 # Configure application
-HOST = os.environ.get('ADDRESS') or '0.0.0.0'
-PORT = os.environ.get('PORT') or 3000
+HOST = os.environ.get('ADDRESS', '0.0.0.0')
+PORT = os.environ.get('PORT', 3000)
 
 # Configure env vars
-APP_NAME = os.environ.get('APP_NAME') or 'unnamed'
+APP_NAME = os.environ.get('APP_NAME', 'unnamed')
 
 # Routes
 @app.route('/')
