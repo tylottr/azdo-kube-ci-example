@@ -1,28 +1,46 @@
+# -*- coding: utf-8 -*-
+"""
+This is a simple Flask application which exposes an index page with
+bare information and a health endpoint that says OK.
+"""
+
 # Load application dependencies
-import os, json
+import os
+import json
 from flask import Flask
 app = Flask(__name__)
 
 # Configure application
-HOST = os.environ.get("ADDRESS") or "0.0.0.0"
-PORT = os.environ.get("PORT") or 3000
+HOST = os.environ.get('ADDRESS') or '0.0.0.0'
+PORT = os.environ.get('PORT') or 3000
 
 # Configure env vars
-APP_NAME = os.environ.get("APP_NAME") or "unnamed"
+APP_NAME = os.environ.get('APP_NAME') or 'unnamed'
 
 # Routes
-@app.route("/")
+@app.route('/')
 def index():
-    return json.dumps({
-      "sourceRepo": "kube-ci-example",
-      "language": "python",
-      "appName": APP_NAME
+    """
+    Returns a small JSON payload with some information.
+    """
+    data = json.dumps({
+        'sourceRepo': 'kube-ci-example',
+        'language': 'python',
+        'appName': APP_NAME
     })
+    return data
 
-@app.route("/health")
+@app.route('/health')
 def health():
-    return "OK"
+    """
+    Returns OK.
+    """
+    return 'OK'
 
 # Main
-if __name__ == "__main__":
-    app.run(debug=True,host=HOST,port=PORT)
+if __name__ == '__main__':
+    app.run(
+        debug=True,
+        host=HOST,
+        port=PORT
+    )
