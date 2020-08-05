@@ -8,7 +8,7 @@ variable "tenant_id" {
   default     = null
 
   validation {
-    condition     = var.tenant_id == null ? true : length(regexall("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", var.tenant_id)) > 0
+    condition     = var.tenant_id == null || can(regex("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", var.tenant_id))
     error_message = "The tenant_id must to be a valid UUID."
   }
 }
@@ -19,7 +19,7 @@ variable "subscription_id" {
   default     = null
 
   validation {
-    condition     = var.subscription_id == null ? true : length(regexall("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", var.subscription_id)) > 0
+    condition     = var.subscription_id == null || can(regex("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", var.subscription_id))
     error_message = "The subscription_id must to be a valid UUID."
   }
 }
@@ -30,7 +30,7 @@ variable "client_id" {
   default     = null
 
   validation {
-    condition     = var.client_id == null ? true : length(regexall("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", var.client_id)) > 0
+    condition     = var.client_id == null || can(regex("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", var.client_id))
     error_message = "The client_id must to be a valid UUID."
   }
 }
