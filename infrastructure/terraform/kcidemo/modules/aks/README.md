@@ -69,7 +69,6 @@ module "aks" {
 |-|-|
 |aks_id|Resource ID of the AKS Cluster|
 |aks_name|Name of the AKS Cluster|
-|aks_resource_group_name|Name of the AKS Cluster Resource Group|
 |aks_node_resource_group_name|Name of the AKS Cluster Resource Group|
 |aks_principal_id|Principal ID of the AKS Cluster identity|
 |aks_kubeconfig|Kubeconfig for the AKS Cluster|
