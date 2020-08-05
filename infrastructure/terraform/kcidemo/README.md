@@ -110,10 +110,10 @@ Helm is a package manager and can be used to template or consume templated Kuber
 
 A number of basic Values files have been set up with version pinning. In the comments are steps to use the charts but we can use the following while within the [files/kubernetes/helm/values](files/kubernetes/helm/values) directory:
 
-> Nginx Ingress is really the "main" one to use here, as it allows external access into cluster resources e.g. microservices
+> Nginx Ingress is really the "main" one to use here, as it allows external access into cluster resources e.g. microservices. You may want to check the yaml files directly as they have more information on how to provision.
 
-- Nginx Ingress: `helm install nginx-ingress stable/nginx-ingress --version 1.29.2 --namespace kube-system --values ./nginx-ingress.yaml`
-- Cert Manager: `helm install cert-manager jetstack/cert-manager --version v0.13.1 --namespace kube-system --values ./cert-manager.yaml`
-- Grafana: `helm install grafana stable/grafana --version 5.0.5 --namespace monitoring --values ./grafana.yaml`
-- Prometheus: `helm install prometheus stable/prometheus --version 11.0.2 --namespace monitoring --values ./prometheus.yaml`
-- Loki: `helm install loki loki/loki-stack --version 0.32.1 --namespace monitoring --values ./loki.yaml`
+- Nginx Ingress: `helm install nginx-ingress stable/nginx-ingress --namespace kube-system --values ./nginx-ingress.yaml`
+- Cert Manager: `helm install cert-manager jetstack/cert-manager --namespace kube-system --values ./cert-manager.yaml`
+- Grafana: `helm install grafana stable/grafana --namespace monitoring --values ./grafana.yaml`
+- Prometheus: `helm install prometheus stable/prometheus --namespace monitoring --values ./prometheus.yaml`
+- Loki: `helm install loki loki/loki-stack - --namespace monitoring --values ./loki.yaml`
