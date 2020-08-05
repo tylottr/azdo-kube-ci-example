@@ -39,7 +39,7 @@ variable "log_analytics_workspace_id" {
   default     = null
 
   validation {
-    condition     = var.log_analytics_workspace_id == null ? true : length(regexall("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", var.log_analytics_workspace_id)) > 0
+    condition     = var.log_analytics_workspace_id == null || can(regex("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", var.log_analytics_workspace_id))
     error_message = "The log_analytics_workspace_id must to be a valid UUID."
   }
 }
@@ -60,7 +60,7 @@ variable "aks_aad_tenant_id" {
   default     = null
 
   validation {
-    condition     = var.aks_aad_tenant_id == null ? true : length(regexall("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", var.aks_aad_tenant_id)) > 0
+    condition     = var.aks_aad_tenant_id == null || can(regex("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", var.aks_aad_tenant_id))
     error_message = "The aks_aad_tenant_id must to be a valid UUID."
   }
 }
@@ -71,7 +71,7 @@ variable "aks_aad_client_app_id" {
   default     = null
 
   validation {
-    condition     = var.aks_aad_client_app_id == null ? true : length(regexall("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", var.aks_aad_client_app_id)) > 0
+    condition     = var.aks_aad_client_app_id == null || can(regex("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", var.aks_aad_client_app_id))
     error_message = "The aks_aad_client_app_id must to be a valid UUID."
   }
 }
@@ -82,7 +82,7 @@ variable "aks_aad_server_app_id" {
   default     = null
 
   validation {
-    condition     = var.aks_aad_server_app_id == null ? true : length(regexall("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", var.aks_aad_server_app_id)) > 0
+    condition     = var.aks_aad_server_app_id == null || can(regex("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", var.aks_aad_server_app_id))
     error_message = "The aks_aad_server_app_id must to be a valid UUID."
   }
 }
@@ -131,9 +131,14 @@ variable "enable_acr_admin" {
 ##########
 
 variable "aks_kubernetes_version" {
-  description = "Version of Kubernetes to use in the cluster"
+  description = "Version of Kubernetes to use in the cluster - use 'latest' for the latest available version"
   type        = string
   default     = null
+
+  validation {
+    condition     = contains([null, "latest"], var.aks_kubernetes_version) || can(regex("\\d+\\.\\d+\\.\\d+", var.aks_kubernetes_version))
+    error_message = "The aks_kubernetes_version value must be 'latest' or semantic versioning e.g. '1.18.4'."
+  }
 }
 
 variable "aks_network_policy" {
@@ -172,7 +177,7 @@ variable "aks_service_cidr" {
   default     = "10.0.0.0/16"
 
   validation {
-    condition     = length(regexall("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{2}", var.aks_service_cidr)) > 0
+    condition     = can(regex("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{2}", var.aks_service_cidr))
     error_message = "The aks_service_cidr must be a valid CIDR range."
   }
 }

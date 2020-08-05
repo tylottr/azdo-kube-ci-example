@@ -27,8 +27,8 @@ resource "azurerm_resource_group" "main" {
 }
 
 module "aks" {
-  location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
   resource_prefix     = "my-little-kube"
 }
 ```
@@ -41,7 +41,7 @@ module "aks" {
 |location|The location of this deployment|string||
 |resource_prefix|A prefix for the name of the resource, used to generate the resource names|string||
 |tags|Tags given to the resources created by this template|map(string)|`{}`|
-|enable_monitoring|Flag used to enable Log Analytics for monitoring the deployed resources|string|`false`|
+|enable_monitoring|Flag used to enable Log Analytics for monitoring the deployed resources|bool|`false`|
 |log_analytics_workspace_id|Log analytics workspace ID to use - defaults to creating a log analytics workspace|string|`null`|
 |enable_aks_aad_rbac|Flag used to enable AAD RBAC Integration|bool|`false`|
 |aks_aad_tenant_id|Tenant ID used for AAD RBAC (defaults to current tenant)|string|`null`|
@@ -52,8 +52,8 @@ module "aks" {
 |acr_sku|SKU of the ACR|string|`"Basic"`|
 |acr_georeplication_locations|Georeplication locations for ACR (Premium tier required)|list(string)|`[]`|
 |enable_acr_admin|Flag used to enable ACR Admin|bool|`false`|
+|aks_kubernetes_version|Version of Kubernetes to use in the cluster - use 'latest' for the latest available version|string|`null`|
 |aks_network_policy|Network policy that should be used ('calico' or 'azure')|bool|`null`|
-|enable_aks_calico|Flag used to enable Calico CNI (Ignored if enable_aks_advanced_networking is true)|bool|`false`|
 |enable_aks_advanced_networking|Flag used to enable Azure CNI|bool|`false`|
 |aks_subnet_name|Name of the subnet for Azure CNI (Ignored if enable_aks_advanced_networking is false)|string|`null`|
 |aks_subnet_vnet_name|Name of the aks_subnet_name's VNet for Azure CNI (Ignored if enable_aks_advanced_networking is false)|string|`null`|
@@ -82,7 +82,3 @@ module "aks" {
 |acr_login_server|Login server of the container registry|
 |acr_admin_user|Admin user for the container registry|
 |acr_admin_password|Admin password for the container registry|
-
-# Known Issues
-
-> Remove or fill this section in.
