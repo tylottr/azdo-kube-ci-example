@@ -41,9 +41,9 @@ variable "tags" {
   default     = {}
 }
 
-####################
-# Resource-Specific
-####################
+###########
+# Security
+###########
 
 variable "admin_object_ids" {
   description = "Object IDs for administrative objects with full access to the Key Vault and Storage Account"
