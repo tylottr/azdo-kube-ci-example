@@ -29,7 +29,7 @@ This document consists of the following sections:
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
     - This can be installed using `az aks install-cli`.
 - [packer](https://www.packer.io/)
-- [terraform](https://www.terraform.io/)
+- [terraform](https://www.terraform.io/) - we need Terraform version 0.12.28 for this as the templates are not expected to be 100% compatible with Terraform 0.13.x
 
 Prior to these tasks ensure that you have ran `az login` and selected the correct target subscription with `az account set --subscription <REPLACE_WITH_SUBSCRIPTION_ID_OR_NAME>`.
 
