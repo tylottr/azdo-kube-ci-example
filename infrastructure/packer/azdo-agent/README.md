@@ -14,7 +14,7 @@ This includes:
 - [Packer](https://packer.io/)
 - [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/index.html)
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
-- [terraform](https://www.terraform.io/) - 0.12
+- [terraform](https://www.terraform.io/) - 0.13
 
 ## Variables
 
