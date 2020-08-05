@@ -28,6 +28,6 @@ output "acr_admin_user" {
 }
 
 output "acr_admin_password" {
-  value = module.aks.acr_admin_password
+  value     = module.aks.acr_admin_password
   sensitive = true
 }
