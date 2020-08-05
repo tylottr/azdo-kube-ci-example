@@ -5,17 +5,15 @@ Thie template will create some base resources for enabling Terraform usage
 ## Prerequisites
 
 Prior to deployment you need the following:
-* [terraform](https://www.terraform.io/) - 0.12
-* [azcli](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
+
+- [terraform](https://www.terraform.io/) - 0.13
+- [azcli](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
 
 In Azure, you need:
-* An account with Owner privileges to the target subscription
+
+- An account with Owner privileges to the target subscription
 
 ## Variables
-
-These are the variables used along with their defaults. For any without a value in default, the value must be filled in unless otherwise sateted otherwise the deployment will encounter failures.
-
-**Global Variables**
 
 |Variable Name|Description|Type|Default Value|
 |-|-|-|-|
@@ -24,11 +22,6 @@ These are the variables used along with their defaults. For any without a value 
 |location|The location of this deployment|`"Central US"`|
 |resource_prefix|A prefix for the name of the resource, used to generate the resource names||
 |tags|Tags given to the resources created by this template|`{}`|
-
-**Resource-Specific Variables**
-
-|Variable Name|Description|Type|Default Value|
-|-|-|-|-|
 |admin_object_ids|Object IDs for administrative objects with full access to the Key Vault and Storage Account|list(string)|`[]`|
 
 ## Outputs
