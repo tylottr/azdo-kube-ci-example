@@ -1,0 +1,31 @@
+# Provision steps:
+#
+# helm repo add loki https://grafana.github.io/loki/charts
+# helm install loki loki/loki-stack --version 0.38.3 --namespace monitoring --values ./loki.yaml
+
+loki:
+  enabled: true
+  replicas: 1
+
+  persistence:
+    enabled: true
+    storageClassName: azure-file-standard-lrs-delete
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
+
+promtail:
+  enabled: true
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi

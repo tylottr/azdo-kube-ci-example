@@ -1,0 +1,56 @@
+# Provision steps:
+#
+# helm repo add stable https://kubernetes-charts.storage.googleapis.com
+# helm install nginx-ingress stable/nginx-ingress --version 1.41.2 --namespace kube-system --values ./nginx-ingress.yaml
+
+rbac:
+  create: true
+
+controller:
+  replicaCount: 2
+  ingressClass: nginx
+
+  config:
+    enable-modsecurity: "true"
+    enable-owasp-modsecurity-crs: "true"
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: app
+              operator: In
+              values:
+              - nginx-ingress
+            - key: component
+              operator: In
+              values:
+              - controller
+          topologyKey: kubernetes.io/hostname
+        weight: 100
+
+  metrics:
+    enabled: true
+    service:
+      annotations:
+        prometheus.io/scrape: "true"
+
+  autoscaling:
+    enabled: true
+    maxReplicas: 4
+    minReplicas: 2
+    targetCPUUtilizationPercentage: 90
+    targetMemoryUtilizationPercentage: 90
+
+defaultBackend:
+  enabled: true

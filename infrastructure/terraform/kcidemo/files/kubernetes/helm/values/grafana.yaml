@@ -1,0 +1,50 @@
+# Provision steps:
+#
+# helm repo add stable https://kubernetes-charts.storage.googleapis.com
+# helm install grafana stable/grafana --version 5.5.5 --namespace monitoring --values ./grafana.yaml
+
+replicas: 1
+persistence:
+  enabled: false
+
+plugins:
+- grafana-simple-json-datasource
+
+datasources:
+  datasources.yaml:
+    apiversion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus-server
+        isDefault: true
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://loki:3100
+
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      updateIntervalSeconds: 15
+      editable: true
+      options:
+        path: /var/lib/grafana/dashboards/default
+
+dashboards:
+  default:
+    kubernetes-cluster:
+      gnetId: 10000
+      revision: 1
+      datasource: Prometheus
+    nginx:
+      gnetId: 9614
+      revision: 1
+      datasource: Prometheus

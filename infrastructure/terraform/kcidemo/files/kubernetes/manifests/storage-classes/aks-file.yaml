@@ -1,0 +1,240 @@
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azure-file-standard-lrs-retain
+  labels:
+    kubernetes.io/cluster-service: "true"
+provisioner: kubernetes.io/azure-file
+reclaimPolicy: Retain
+parameters:
+  skuName: Standard_LRS
+allowVolumeExpansion: true
+volumeBindingMode: Immediate
+mountOptions:
+- dir_mode=0777
+- file_mode=0777
+- uid=0
+- gid=0
+- mfsymlinks
+- cache=strict
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azure-file-standard-lrs-delete
+  labels:
+    kubernetes.io/cluster-service: "true"
+provisioner: kubernetes.io/azure-file
+reclaimPolicy: Delete
+parameters:
+  skuName: Standard_LRS
+allowVolumeExpansion: true
+volumeBindingMode: Immediate
+mountOptions:
+- dir_mode=0777
+- file_mode=0777
+- uid=0
+- gid=0
+- mfsymlinks
+- cache=strict
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azure-file-standard-grs-retain
+  labels:
+    kubernetes.io/cluster-service: "true"
+provisioner: kubernetes.io/azure-file
+reclaimPolicy: Retain
+parameters:
+  skuName: Standard_GRS
+allowVolumeExpansion: true
+volumeBindingMode: Immediate
+mountOptions:
+- dir_mode=0777
+- file_mode=0777
+- uid=0
+- gid=0
+- mfsymlinks
+- cache=strict
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azure-file-standard-grs-delete
+  labels:
+    kubernetes.io/cluster-service: "true"
+provisioner: kubernetes.io/azure-file
+reclaimPolicy: Delete
+parameters:
+  skuName: Standard_GRS
+allowVolumeExpansion: true
+volumeBindingMode: Immediate
+mountOptions:
+- dir_mode=0777
+- file_mode=0777
+- uid=0
+- gid=0
+- mfsymlinks
+- cache=strict
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azure-file-standard-zrs-retain
+  labels:
+    kubernetes.io/cluster-service: "true"
+provisioner: kubernetes.io/azure-file
+reclaimPolicy: Retain
+parameters:
+  skuName: Standard_ZRS
+allowVolumeExpansion: true
+volumeBindingMode: Immediate
+mountOptions:
+- dir_mode=0777
+- file_mode=0777
+- uid=0
+- gid=0
+- mfsymlinks
+- cache=strict
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azure-file-standard-zrs-delete
+  labels:
+    kubernetes.io/cluster-service: "true"
+provisioner: kubernetes.io/azure-file
+reclaimPolicy: Delete
+parameters:
+  skuName: Standard_ZRS
+allowVolumeExpansion: true
+volumeBindingMode: Immediate
+mountOptions:
+- dir_mode=0777
+- file_mode=0777
+- uid=0
+- gid=0
+- mfsymlinks
+- cache=strict
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azure-file-standard-ragrs-retain
+  labels:
+    kubernetes.io/cluster-service: "true"
+provisioner: kubernetes.io/azure-file
+reclaimPolicy: Retain
+parameters:
+  skuName: Standard_RAGRS
+allowVolumeExpansion: true
+volumeBindingMode: Immediate
+mountOptions:
+- dir_mode=0777
+- file_mode=0777
+- uid=0
+- gid=0
+- mfsymlinks
+- cache=strict
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azure-file-standard-ragrs-delete
+  labels:
+    kubernetes.io/cluster-service: "true"
+provisioner: kubernetes.io/azure-file
+reclaimPolicy: Delete
+parameters:
+  skuName: Standard_RAGRS
+allowVolumeExpansion: true
+volumeBindingMode: Immediate
+mountOptions:
+- dir_mode=0777
+- file_mode=0777
+- uid=0
+- gid=0
+- mfsymlinks
+- cache=strict
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azure-file-premium-lrs-retain
+  labels:
+    kubernetes.io/cluster-service: "true"
+provisioner: kubernetes.io/azure-file
+reclaimPolicy: Retain
+parameters:
+  skuName: Premium_LRS
+allowVolumeExpansion: true
+volumeBindingMode: Immediate
+mountOptions:
+- dir_mode=0777
+- file_mode=0777
+- uid=0
+- gid=0
+- mfsymlinks
+- cache=strict
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azure-file-premium-lrs-delete
+  labels:
+    kubernetes.io/cluster-service: "true"
+provisioner: kubernetes.io/azure-file
+reclaimPolicy: Delete
+parameters:
+  skuName: Premium_LRS
+allowVolumeExpansion: true
+volumeBindingMode: Immediate
+mountOptions:
+- dir_mode=0777
+- file_mode=0777
+- uid=0
+- gid=0
+- mfsymlinks
+- cache=strict
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azure-file-premium-zrs-retain
+  labels:
+    kubernetes.io/cluster-service: "true"
+provisioner: kubernetes.io/azure-file
+reclaimPolicy: Retain
+parameters:
+  skuName: Premium_ZRS
+allowVolumeExpansion: true
+volumeBindingMode: Immediate
+mountOptions:
+- dir_mode=0777
+- file_mode=0777
+- uid=0
+- gid=0
+- mfsymlinks
+- cache=strict
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azure-file-premium-zrs-delete
+  labels:
+    kubernetes.io/cluster-service: "true"
+provisioner: kubernetes.io/azure-file
+reclaimPolicy: Delete
+parameters:
+  skuName: Premium_ZRS
+allowVolumeExpansion: true
+volumeBindingMode: Immediate
+mountOptions:
+- dir_mode=0777
+- file_mode=0777
+- uid=0
+- gid=0
+- mfsymlinks
+- cache=strict

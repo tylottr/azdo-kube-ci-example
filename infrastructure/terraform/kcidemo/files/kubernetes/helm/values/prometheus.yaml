@@ -1,0 +1,46 @@
+# Provision steps:
+#
+# helm repo add stable https://kubernetes-charts.storage.googleapis.com
+# helm install prometheus stable/prometheus --version 11.11.1 --namespace monitoring --values ./prometheus.yaml
+rbac:
+  create: true
+
+podSecurityPolicy:
+  enabled: true
+
+server:
+  replicaCount: 1
+  statefulSet:
+    enabled: true
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 1Gi
+    limits:
+      cpu: 250m
+      memory: 2Gi
+
+  persistentVolume:
+    enabled: true
+    storageClass: azure-file-standard-lrs-retain
+
+  retention: "7d"
+
+nodeExporter:
+  resources:
+    requests: 
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      cpu: 200m
+      memory: 100Mi
+
+kubeStateMetrics:
+  enabled: true
+
+alertmanager:
+  enabled: false
+
+pushgateway:
+  enabled: false

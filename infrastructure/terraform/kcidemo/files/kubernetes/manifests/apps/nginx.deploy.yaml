@@ -1,0 +1,131 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-files
+  labels:
+    app: nginx
+data:
+  nginx.config: |
+    server {
+        listen       3000;
+        server_name  _;
+
+        location / {
+            root   /usr/share/nginx/html;
+            index  index.html;
+        }
+
+        location /health {
+            return 200 "OK\n";
+        }
+    }
+  nginx.index: |
+    Hello from Kubernetes!
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+      annotations:
+        container.apparmor.security.beta.kubernetes.io/service: runtime/default
+        seccomp.security.alpha.kubernetes.io/pod: runtime/default
+    spec:
+      automountServiceAccountToken: false
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-files
+          items:
+          - key: nginx.config
+            path: default.conf
+      - name: nginx-index
+        configMap:
+          name: nginx-files
+          items:
+          - key: nginx.index
+            path: index.html
+      containers:
+      - name: service
+        image: nginx:1.7.9
+        ports:
+        - name: http
+          containerPort: 3000
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d/
+        - name: nginx-index
+          mountPath: /usr/share/nginx/html/
+        livenessProbe:
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          httpGet:
+            port: http
+            path: /health
+        readinessProbe:
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          httpGet:
+            port: http
+            path: /health
+        resources:
+          requests:
+            cpu: 10m
+            memory: 8Mi
+          limits:
+            cpu: 20m
+            memory: 16Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop:
+            - ALL
+            add:
+            - CHOWN
+            - NET_BIND_SERVICE
+            - SETGID
+            - SETUID
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  type: ClusterIP
+  selector:
+    app: nginx
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        backend:
+          serviceName: nginx
+          servicePort: http

@@ -1,6 +1,7 @@
-####################
-# Service Principal
-####################
+###########
+# Azure AD
+###########
+
 resource "azuread_application" "terraform" {
   name     = "Terraform"
   homepage = "http://localhost"
@@ -19,9 +20,6 @@ resource "azurerm_role_assignment" "subscription" {
   principal_id         = azuread_service_principal.terraform.object_id
 }
 
-#################
-# Azure AD Group
-#################
 resource "azuread_group" "terraform" {
   name        = "Terraform Administrators"
   description = "A group for Terraform Administrators with access to core Terraform resources."
@@ -39,9 +37,10 @@ resource "azuread_group_member" "terraform_sp" {
   member_object_id = azuread_service_principal.terraform.object_id
 }
 
-#################
-# Resource Group
-#################
+######################
+# Resource Management
+######################
+
 resource "azurerm_resource_group" "main" {
   name     = "${var.resource_prefix}-rg"
   location = var.location
@@ -57,6 +56,7 @@ resource "azurerm_role_assignment" "resource_group" {
 ##########
 # Storage
 ##########
+
 resource "azurerm_storage_account" "state" {
   name                = lower(replace("${var.resource_prefix}tfssa", "/[-_]/", ""))
   resource_group_name = azurerm_resource_group.main.name
@@ -98,9 +98,10 @@ resource "azurerm_storage_share" "shell" {
   quota                = 5
 }
 
-############
-# Key Vault
-############
+###########
+# Security
+###########
+
 resource "azurerm_key_vault" "main" {
   name                = lower(replace("${var.resource_prefix}tfkv", "/[-_]/", ""))
   resource_group_name = azurerm_resource_group.main.name

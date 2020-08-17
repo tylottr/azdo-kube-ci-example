@@ -72,15 +72,17 @@ stages:
       displayName: 'Install Kubectl'
 
     - task: Bash@3
-      name: 'createKubernetesResources'
-      displayName: 'Create Kubernetes resources'
+      name: 'createKcidemoResources'
+      displayName: 'Create kcidemo resources'
       inputs:
         targetType: 'inline'
         script: |
           terraform output aks_config > config
-          kubectl apply --kubeconfig config -f ../../kubernetes/kcidemo
+          kubectl apply -f ../../kubernetes/kcidemo
           rm -f config
         workingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
+      env:
+        KUBECONFIG: './config'
 
 # Steps below will perform a DESTROY operation on existing infrastructure.
 - stage: 'destroy'
