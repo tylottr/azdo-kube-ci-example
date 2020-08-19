@@ -45,15 +45,14 @@ module "aks" {
 |log_analytics_workspace_id|Log analytics workspace ID to use - defaults to creating a log analytics workspace|string|`null`|
 |enable_aks_aad_rbac|Flag used to enable AAD RBAC Integration|bool|`false`|
 |aks_aad_tenant_id|Tenant ID used for AAD RBAC (defaults to current tenant)|string|`null`|
-|aks_aad_client_app_id|App ID of the client application used for AAD RBAC|string|`null`|
-|aks_aad_server_app_id|App ID of the server application used for AAD RBAC|string|`null`|
-|aks_aad_server_app_secret|App Secret of the server application used for AAD RBAC|string|`null`|
+|aks_aad_admin_group_object_ids|Object IDs of AAD Groups that have Admin role over the cluster|list(string)|`null`|
 |enable_acr|Flag used to enable ACR|bool|`false`|
 |acr_sku|SKU of the ACR|string|`"Basic"`|
 |acr_georeplication_locations|Georeplication locations for ACR (Premium tier required)|list(string)|`[]`|
 |enable_acr_admin|Flag used to enable ACR Admin|bool|`false`|
 |aks_kubernetes_version|Version of Kubernetes to use in the cluster - use 'latest' for the latest available version|string|`null`|
-|aks_network_policy|Network policy that should be used ('calico' or 'azure')|bool|`null`|
+|aks_load_balancer_sku|SKU to use for the AKS Load Balancer|string|`"Standard"`|
+|aks_network_policy|Network policy that should be used ('calico' or 'azure')|string|`null`|
 |enable_aks_advanced_networking|Flag used to enable Azure CNI|bool|`false`|
 |aks_subnet_name|Name of the subnet for Azure CNI (Ignored if enable_aks_advanced_networking is false)|string|`null`|
 |aks_subnet_vnet_name|Name of the aks_subnet_name's VNet for Azure CNI (Ignored if enable_aks_advanced_networking is false)|string|`null`|

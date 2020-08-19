@@ -65,32 +65,16 @@ variable "aks_aad_tenant_id" {
   }
 }
 
-variable "aks_aad_client_app_id" {
-  description = "App ID of the client application used for AAD RBAC"
-  type        = string
+variable "aks_aad_admin_group_object_ids" {
+  description = "Object IDs of AAD Groups that have Admin role over the cluster"
+  type        = list(string)
   default     = null
 
   validation {
-    condition     = var.aks_aad_client_app_id == null || can(regex("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", var.aks_aad_client_app_id))
-    error_message = "The aks_aad_client_app_id must to be a valid UUID."
+    // If null, pass. If a list, ensure we don't have any entries that aren't UUIDs.
+    condition     = var.aks_aad_admin_group_object_ids == null || ! can(index([for uuid in var.aks_aad_admin_group_object_ids : can(regex("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", uuid))], false))
+    error_message = "The aks_aad_admin_group_object_ids must be valid UUIDs."
   }
-}
-
-variable "aks_aad_server_app_id" {
-  description = "App ID of the server application used for AAD RBAC"
-  type        = string
-  default     = null
-
-  validation {
-    condition     = var.aks_aad_server_app_id == null || can(regex("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", var.aks_aad_server_app_id))
-    error_message = "The aks_aad_server_app_id must to be a valid UUID."
-  }
-}
-
-variable "aks_aad_server_app_secret" {
-  description = "App Secret of the server application used for AAD RBAC"
-  type        = string
-  default     = null
 }
 
 ##########
@@ -136,15 +120,31 @@ variable "aks_kubernetes_version" {
   default     = null
 
   validation {
-    condition     = contains([null, "latest"], var.aks_kubernetes_version) || can(regex("\\d+\\.\\d+\\.\\d+", var.aks_kubernetes_version))
+    condition     = var.aks_kubernetes_version == null || var.aks_kubernetes_version == "latest" || can(regex("\\d+\\.\\d+\\.\\d+", var.aks_kubernetes_version))
     error_message = "The aks_kubernetes_version value must be 'latest' or semantic versioning e.g. '1.18.4'."
+  }
+}
+
+variable "aks_load_balancer_sku" {
+  description = "SKU to use for the AKS Load Balancer"
+  type        = string
+  default     = "Standard"
+
+  validation {
+    condition     = contains(["Basic", "Standard"], var.aks_load_balancer_sku)
+    error_message = "The aks_load_balancer_sku must be 'Basic' or 'Standard'."
   }
 }
 
 variable "aks_network_policy" {
   description = "Network policy that should be used ('calico' or 'azure')"
-  type        = bool
+  type        = string
   default     = null
+
+  validation {
+    condition     = var.aks_network_policy == null || var.aks_network_policy == "calico" || var.aks_network_policy == "azure"
+    error_message = "The aks_network_policy must be 'null', 'calico' or 'azure'."
+  }
 }
 
 variable "enable_aks_advanced_networking" {

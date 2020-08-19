@@ -16,7 +16,7 @@ module "aks" {
 
   aks_kubernetes_version = "latest"
 
-  // Implicit dependency on azurerm_resource_group.main used due to a problem with the
+  // Explicit dependency on azurerm_resource_group.main used due to a problem with the
   // module not picking up the implicit dependency.
   depends_on = [azurerm_resource_group.main]
 }

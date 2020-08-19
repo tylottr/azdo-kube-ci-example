@@ -62,20 +62,12 @@ resource "azurerm_kubernetes_cluster" "main" {
     enabled = true
 
     dynamic azure_active_directory {
-      /*
-       * If enabling RBAC and app settings are not set,
-       * an error will be returned. This is by design
-       * to avoid accidentally creating a cluster without
-       * AAD integration.
-       **
-      */
       for_each = var.enable_aks_aad_rbac ? [true] : []
 
       content {
-        tenant_id         = var.aks_aad_tenant_id
-        client_app_id     = var.aks_aad_client_app_id
-        server_app_id     = var.aks_aad_server_app_id
-        server_app_secret = var.aks_aad_server_app_secret
+        managed                = true
+        tenant_id              = var.aks_aad_tenant_id
+        admin_group_object_ids = var.aks_aad_admin_group_object_ids
       }
     }
   }
@@ -84,7 +76,7 @@ resource "azurerm_kubernetes_cluster" "main" {
 
   network_profile {
     network_plugin    = var.enable_aks_advanced_networking ? "azure" : "kubenet"
-    load_balancer_sku = "Standard"
+    load_balancer_sku = var.aks_load_balancer_sku
 
     pod_cidr           = var.enable_aks_advanced_networking ? null : "10.244.0.0/16"
     network_policy     = var.aks_network_policy
