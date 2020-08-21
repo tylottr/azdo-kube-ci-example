@@ -113,13 +113,7 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   lifecycle {
-    ignore_changes = [
-      default_node_pool,
-      kubernetes_version,
-      service_principal,
-      role_based_access_control,
-      addon_profile
-    ]
+    ignore_changes = [default_node_pool[0].node_count, kubernetes_version]
   }
 }
 
