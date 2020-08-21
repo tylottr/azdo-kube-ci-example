@@ -188,6 +188,12 @@ variable "aks_service_cidr" {
   }
 }
 
+variable "aks_default_node_pool_name" {
+  description = "Name of the default node pool"
+  type        = string
+  default     = "default"
+}
+
 variable "aks_node_size" {
   description = "Size of nodes in the AKS cluster"
   type        = string
@@ -214,6 +220,18 @@ variable "aks_node_max_count" {
     condition     = var.aks_node_max_count > 0
     error_message = "The aks_node_max_count is less than 1."
   }
+}
+
+variable "aks_default_node_pool_availability_zones" {
+  description = "Availability zones to use with the default node pool"
+  type        = list(number)
+  default     = null
+}
+
+variable "aks_default_node_pool_labels" {
+  description = "Node labels to apply to the default node pool"
+  type        = map(string)
+  default     = null
 }
 
 #########

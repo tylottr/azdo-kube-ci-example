@@ -60,9 +60,12 @@ module "aks" {
 |aks_subnet_vnet_name|Name of the aks_subnet_name's VNet for Azure CNI (Ignored if enable_aks_advanced_networking is false)|string|`null`|
 |aks_subnet_vnet_resource_group_name|Name of the resource group for aks_subnet_vnet_name for Azure CNI (Ignored if enable_aks_advanced_networking is false)|string|`null`|
 |aks_service_cidr|Service CIDR for AKS|string|`"10.0.0.0/16"`|
+|aks_default_node_pool_name|Name of the default node pool|string|`"default"`|
 |aks_node_size|Size of nodes in the AKS cluster|string|`"Standard_B2ms"`|
 |aks_node_min_count|Minimum number of nodes in the AKS cluster|number|`1`|
 |aks_node_max_count|Maximum number of nodes in the AKS cluster|number|`1`|
+|aks_default_node_pool_availability_zones|Availability zones to use with the default node pool|list(number)|`null`|
+|aks_default_node_pool_labels|Node labels to apply to the default node pool|map(string)|`null`|
 
 ## Outputs
 

@@ -86,18 +86,22 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   default_node_pool {
-    name                  = "default"
-    type                  = "VirtualMachineScaleSets"
-    tags                  = var.tags
+    name = var.aks_default_node_pool_name
+    type = "VirtualMachineScaleSets"
+    tags = var.tags
+
     enable_auto_scaling   = true
     enable_node_public_ip = false
 
-    vm_size    = var.aks_node_size
-    node_count = var.aks_node_min_count
-    min_count  = var.aks_node_min_count
-    max_count  = var.aks_node_max_count
+    vm_size            = var.aks_node_size
+    node_count         = var.aks_node_min_count
+    min_count          = var.aks_node_min_count
+    max_count          = var.aks_node_max_count
+    availability_zones = var.aks_default_node_pool_availability_zones
 
     vnet_subnet_id = var.enable_aks_advanced_networking ? data.azurerm_subnet.main[0].id : null
+
+    node_labels = var.aks_default_node_pool_labels
   }
 
   addon_profile {
