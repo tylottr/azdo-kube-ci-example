@@ -12,6 +12,7 @@ It provides the following:
 - Optional AAD RBAC integration
 - Options for advanced networking
 - Options for network policies
+- Optional Kube Dashboard with AKS
 - Optional Log Analytics Workspace creation (Or provide your own workspace ID)
 
 ## Usage
@@ -52,6 +53,7 @@ module "aks" {
 |enable_acr_admin|Flag used to enable ACR Admin|bool|`false`|
 |aks_kubernetes_version|Version of Kubernetes to use in the cluster - use 'latest' for the latest available version|string|`null`|
 |aks_load_balancer_sku|SKU to use for the AKS Load Balancer|string|`"Standard"`|
+|enable_aks_kube_dashboard|Flag used to enable AKS Kube Dashboard addon|bool|`false`|
 |aks_network_policy|Network policy that should be used ('calico' or 'azure')|string|`null`|
 |enable_aks_advanced_networking|Flag used to enable Azure CNI|bool|`false`|
 |aks_subnet_name|Name of the subnet for Azure CNI (Ignored if enable_aks_advanced_networking is false)|string|`null`|

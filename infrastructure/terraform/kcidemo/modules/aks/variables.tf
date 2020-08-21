@@ -136,6 +136,12 @@ variable "aks_load_balancer_sku" {
   }
 }
 
+variable "enable_aks_kube_dashboard" {
+  description = "Flag used to enable AKS Kube Dashboard addon"
+  type        = bool
+  default     = false
+}
+
 variable "aks_network_policy" {
   description = "Network policy that should be used ('calico' or 'azure')"
   type        = string

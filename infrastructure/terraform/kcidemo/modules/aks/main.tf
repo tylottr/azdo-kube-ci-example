@@ -102,8 +102,7 @@ resource "azurerm_kubernetes_cluster" "main" {
 
   addon_profile {
     kube_dashboard {
-      // Disabling to reduce default resource usage. If needed enable manually via Helm or Azure.
-      enabled = false
+      enabled = var.enable_aks_kube_dashboard
     }
 
     oms_agent {
