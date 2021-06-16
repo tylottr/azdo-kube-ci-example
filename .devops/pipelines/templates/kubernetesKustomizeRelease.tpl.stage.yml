@@ -7,7 +7,7 @@
 parameters:
 - name: 'kubectlVersion'
   type: 'string'
-  default: '1.18.0'
+  default: '1.21.1'
 - name: 'appName'
   type: 'string'
   default: ''
