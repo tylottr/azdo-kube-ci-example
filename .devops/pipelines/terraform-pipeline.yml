@@ -42,7 +42,7 @@ stages:
 # This cannot be reused due to jobs requiring unique names.
 - template: '/.devops/pipelines/templates/terraformRun.tpl.stage.yml'
   parameters:
-    terraformVersion: '0.12.28'
+    terraformVersion: '1.0.0'
     terraformWorkingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'
     terraformStateAzureSubscriptionName: '$(terraformStateAzureSubscriptionName)'
     terraformStateStorageAccountName: '$(terraformStateStorageAccountName)'

@@ -52,7 +52,7 @@ The below script will create the resources for us, initialise some variables we 
 ```bash
 # Initialize our directory
 cd infrastructure/terraform/terraform-ops
-echo -e "resource_prefix = \"REPLACE_WITH_SOMETHING_UNIQUE\"" > global.auto.tfvars
+echo -e "resource_prefix = \"changeme\"" > terraform.tfvars
 
 # Run Terraform
 terraform init
@@ -60,21 +60,14 @@ terraform validate
 terraform apply
 
 # Collect information
-resourceGroup=$(terraform output resource_group_name)
-location=$(terraform output resource_group_location)
-storageAccount=$(terraform output terraform_storage_account_name)
-keyVault=$(terraform output key_vault_name)
-terraformSpClientId=$(terraform output terraform_client_id)
-certName="TerraformSP-$(terraform output terraform_object_id)"
+resourceGroup=$(terraform output -raw resource_group_name)
+location=$(terraform output -raw resource_group_location)
+storageAccount=$(terraform output -raw terraform_storage_account_name)
+keyVault=$(terraform output -raw key_vault_name)
+terraformSpClientId=$(terraform output -raw terraform_client_id)
+certName="TerraformSP-$(terraform output -raw terraform_object_id)"
 
 # Generate credentials
-# Certificate
-az ad sp credential reset --create-cert \
-  --name $terraformSpClientId \
-  --keyvault $keyVault \
-  --cert $certName
-
-# Password
 terraformSpPassword=$(
   az ad sp credential reset \
     --name $terraformSpClientId \
@@ -110,7 +103,7 @@ First we will create a file to store our generated source image from the last st
 ```bash
 # Initialize our directory
 cd infrastructure/terraform/kcidemo
-echo -e "resource_prefix = \"REPLACE_WITH_SOMETHING_UNIQUE\"" > global.auto.tfvars
+echo -e "resource_prefix = \"changeme\"" > terraform.tfvars
 
 # Run Terraform
 terraform init \
