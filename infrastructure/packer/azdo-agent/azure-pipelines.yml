@@ -39,3 +39,4 @@ stages:
     azureSubscription: '$(packerAzureSubscription)'
     packerAzureLocation: '$(packerAzureLocation)'
     packerAzureResourceGroup: '$(packerAzureResourceGroup)'
+    packerTemplateFile: 'agent.pkr.hcl'

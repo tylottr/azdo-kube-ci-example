@@ -23,6 +23,9 @@ parameters:
 - name: 'packerAzureResourceGroup'
   type: 'string'
   default: ''
+- name: 'packerTemplateFile'
+  type: 'string'
+  default: ''
 
 stages:
 - stage: 'build'
@@ -105,7 +108,7 @@ stages:
       displayName: 'Build Image'
       inputs:
         targetType: 'inline'
-        script: './packer build -var-file parameters.json agent.json'
+        script: './packer build -var-file parameters.json ${{ parameters.packerTemplateFile }}'
         workingDirectory: '${{ parameters.packerWorkingDirectory }}'
       env:
         AZURE_SUBSCRIPTION_ID: '$(AZURE_SUBSCRIPTION_ID)'

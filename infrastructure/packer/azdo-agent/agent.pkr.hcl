@@ -1,7 +1,7 @@
 variable "subscription_id" {
   description = "The subscription id of this image"
   type        = string
-  default     = null
+  default     = env("AZURE_SUBSCRIPTION_ID")
 
   validation {
     condition     = var.subscription_id == null || can(regex("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", var.subscription_id))
@@ -12,7 +12,7 @@ variable "subscription_id" {
 variable "client_id" {
   description = "The client ID used to authenticate to Azure"
   type        = string
-  default     = null
+  default     = env("AZURE_CLIENT_ID")
 
   validation {
     condition     = var.client_id == null || can(regex("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", var.client_id))
@@ -21,8 +21,9 @@ variable "client_id" {
 }
 
 variable "client_secret" {
-  type    = string
-  default = null
+  description = "The client secret used to authenticate to Azure"
+  type        = string
+  default     = env("AZURE_CLIENT_SECRET")
 }
 
 variable "location" {
