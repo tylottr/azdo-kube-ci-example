@@ -48,8 +48,8 @@ Below describes the steps to deploy this template.
     * Terraform has a number of ways to authenticate. See [here](https://www.terraform.io/docs/providers/azurerm/guides/azure_cli.html) for more information.
 3. Initialise Terraform with `terraform init`
     * By default, state is stored locally. State can be stored in different backends. See [here](https://www.terraform.io/docs/backends/types/index.html) for more information.
-4. Set the workspace with `terraform workspace select <replace with environment>`
-    * If the workspace does not exist, use `terraform workspace new <replace with environment>`
+4. (Optional) Set the workspace with `terraform workspace select changeme`
+    * If the workspace does not exist, use `terraform workspace new changeme`
 5. Generate a plan with `terraform plan -out tf.plan`
 6. If the plan passes, apply it with `terraform apply tf.plan`
 

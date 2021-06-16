@@ -1,7 +1,7 @@
 terraform {
   backend "azurerm" {
-    # storage_account_name = "REPLACE_WITH_STORAGE_ACCOUNT_NAME"
+    # storage_account_name = "changeme"
     container_name = "tfstate"
-    key            = "kcidemo/terraform.tfstate"
+    key            = "terraform/kcidemo/terraform.tfstate"
   }
 }

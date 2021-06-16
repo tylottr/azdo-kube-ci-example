@@ -72,7 +72,7 @@ variable "aks_aad_admin_group_object_ids" {
 
   validation {
     // If null, pass. If a list, ensure we don't have any entries that aren't UUIDs.
-    condition     = var.aks_aad_admin_group_object_ids == null || ! can(index([for uuid in var.aks_aad_admin_group_object_ids : can(regex("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", uuid))], false))
+    condition     = var.aks_aad_admin_group_object_ids == null || !can(index([for uuid in var.aks_aad_admin_group_object_ids : can(regex("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}", uuid))], false))
     error_message = "The aks_aad_admin_group_object_ids must be valid UUIDs."
   }
 }
