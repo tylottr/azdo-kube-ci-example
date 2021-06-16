@@ -3,6 +3,7 @@ kind: Ingress
 metadata:
   name: kci
   annotations:
+    kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/enable-cors: "true"
 spec:
   rules:
@@ -10,6 +11,7 @@ spec:
     http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
           serviceName: kci
           servicePort: http
