@@ -3,8 +3,7 @@
 ###########
 
 resource "azuread_application" "terraform" {
-  name     = "Terraform"
-  homepage = "http://localhost"
+  display_name = "Terraform"
 }
 
 resource "azuread_service_principal" "terraform" {
@@ -21,8 +20,8 @@ resource "azurerm_role_assignment" "subscription" {
 }
 
 resource "azuread_group" "terraform" {
-  name        = "Terraform Administrators"
-  description = "A group for Terraform Administrators with access to core Terraform resources."
+  display_name = "Terraform Administrators"
+  description  = "A group for Terraform Administrators with access to core Terraform resources."
 }
 
 resource "azuread_group_member" "terraform" {
@@ -47,7 +46,7 @@ resource "azurerm_resource_group" "main" {
   tags     = var.tags
 }
 
-resource "azurerm_role_assignment" "resource_group" {
+resource "azurerm_role_assignment" "terraform_resource_group_contributor" {
   scope                = azurerm_resource_group.main.id
   role_definition_name = "Contributor"
   principal_id         = azuread_group.terraform.object_id
@@ -108,9 +107,8 @@ resource "azurerm_key_vault" "main" {
   location            = var.location
   tags                = var.tags
 
-  tenant_id           = data.azurerm_client_config.current.tenant_id
-  sku_name            = "standard"
-  soft_delete_enabled = false
+  tenant_id = data.azurerm_client_config.current.tenant_id
+  sku_name  = "standard"
 
   enabled_for_template_deployment = true
 }

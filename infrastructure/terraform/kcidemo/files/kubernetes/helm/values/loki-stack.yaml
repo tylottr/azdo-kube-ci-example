@@ -1,7 +1,7 @@
 # Provision steps:
 #
-# helm repo add loki https://grafana.github.io/loki/charts
-# helm install loki loki/loki-stack --version 0.38.3 --namespace monitoring --values ./loki.yaml
+# helm repo add grafana https://grafana.github.io/helm-charts
+# helm install loki grafana/loki-stack --version 2.4.1 --namespace monitoring --values ./loki-stack.yaml
 
 loki:
   enabled: true

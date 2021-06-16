@@ -2,10 +2,10 @@
 - import_tasks: packages.yml
 
 - import_tasks: docker_cleanup_create.yml
-  when: docker_maintenance_tasks is true
+  when: docker_maintenance_tasks
 - import_tasks: docker_cleanup_remove.yml
-  when: docker_maintenance_tasks is not true
+  when: not docker_maintenance_tasks
 
 # NEXT: Setup to install the Azure DevOps agent. Default to false.
 - import_tasks: azdo.yml
-  when: azdo_agent_install is true
+  when: azdo_agent_install

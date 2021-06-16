@@ -26,8 +26,17 @@ resource "azurerm_container_registry" "main" {
   location            = var.location
   tags                = var.tags
 
-  sku                      = var.acr_sku
-  georeplication_locations = length(var.acr_georeplication_locations) < 1 ? null : var.acr_georeplication_locations
+  sku = var.acr_sku
+
+  dynamic "georeplications" {
+    for_each = length(var.acr_georeplication_locations) < 1 ? [] : var.acr_georeplication_locations
+    iterator = georeplication
+
+    content {
+      location = georeplication
+      tags     = var.tags
+    }
+  }
 
   admin_enabled = var.enable_acr_admin
 }
@@ -50,7 +59,7 @@ resource "azurerm_kubernetes_cluster" "main" {
   location            = var.location
   tags                = var.tags
 
-  kubernetes_version = var.aks_kubernetes_version == "latest" ? data.azurerm_kubernetes_service_versions.current.latest_version : var.aks_kubernetes_version
+  kubernetes_version = var.aks_kubernetes_version == null ? data.azurerm_kubernetes_service_versions.current.latest_version : var.aks_kubernetes_version
 
   dns_prefix = local.resource_prefix
 
@@ -61,13 +70,14 @@ resource "azurerm_kubernetes_cluster" "main" {
   role_based_access_control {
     enabled = true
 
-    dynamic azure_active_directory {
+    dynamic "azure_active_directory" {
       for_each = var.enable_aks_aad_rbac ? [true] : []
 
       content {
         managed                = true
         tenant_id              = var.aks_aad_tenant_id
         admin_group_object_ids = var.aks_aad_admin_group_object_ids
+        azure_rbac_enabled     = true
       }
     }
   }
@@ -131,7 +141,7 @@ resource "azurerm_monitor_diagnostic_setting" "main_aks" {
   target_resource_id         = azurerm_kubernetes_cluster.main.id
   log_analytics_workspace_id = coalesce(var.log_analytics_workspace_id, azurerm_log_analytics_workspace.main[0].id)
 
-  dynamic log {
+  dynamic "log" {
     for_each = data.azurerm_monitor_diagnostic_categories.main_aks.logs
     iterator = log_category
 
@@ -146,7 +156,7 @@ resource "azurerm_monitor_diagnostic_setting" "main_aks" {
     }
   }
 
-  dynamic metric {
+  dynamic "metric" {
     for_each = data.azurerm_monitor_diagnostic_categories.main_aks.metrics
     iterator = metric_category
 

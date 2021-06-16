@@ -1,0 +1,58 @@
+repositories:
+- name: ingress-nginx
+  url: https://kubernetes.github.io/ingress-nginx
+- name: jetstack
+  url: https://charts.jetstack.io
+- name: grafana
+  url: https://grafana.github.io/helm-charts
+- name: prometheus-community
+  url: https://prometheus-community.github.io/helm-charts
+- name: kube-state-metrics
+  url: https://kubernetes.github.io/kube-state-metrics
+
+releases:
+- name: ingress-nginx
+  chart: ingress-nginx/ingress-nginx
+  version: "3.33.0"
+  namespace: ingress-nginx
+  createNamespace: true
+  values:
+  - ./values/ingress-nginx.yaml
+  installed: true
+  atomic: true
+- name: cert-manager
+  chart: jetstack/cert-manager
+  version: "1.4.0"
+  namespace: cert-manager
+  createNamespace: true
+  values:
+  - ./values/cert-manager.yaml
+  installed: true
+  atomic: true
+- name: grafana
+  chart: grafana/grafana
+  version: "6.13.0"
+  namespace: monitoring
+  createNamespace: true
+  values:
+  - ./values/grafana.yaml
+  installed: true
+  atomic: true
+- name: prometheus
+  chart: prometheus-community/prometheus
+  version: "14.2.0"
+  namespace: monitoring
+  createNamespace: true
+  values:
+  - ./values/prometheus.yaml
+  installed: true
+  atomic: true
+- name: loki
+  chart: grafana/loki-stack
+  version: "2.4.1"
+  namespace: monitoring
+  createNamespace: true
+  values:
+  - ./values/loki-stack.yaml
+  installed: true
+  atomic: true

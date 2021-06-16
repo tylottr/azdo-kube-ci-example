@@ -29,9 +29,9 @@ This document consists of the following sections:
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
     - This can be installed using `az aks install-cli`.
 - [packer](https://www.packer.io/)
-- [terraform](https://www.terraform.io/) - 0.13
+- [terraform](https://www.terraform.io/)
 
-Prior to these tasks ensure that you have ran `az login` and selected the correct target subscription with `az account set --subscription <REPLACE_WITH_SUBSCRIPTION_ID_OR_NAME>`.
+Prior to these tasks ensure that you have ran `az login` and selected the correct target subscription with `az account set --subscription changeme`.
 
 ## 2. Infrastructure Configuration
 
@@ -45,14 +45,12 @@ To create our base Azure resources, we will use a Terraform configuration stored
 
 This resource group will be used for our shared resources.
 
-The below script will create the resources for us, initialise some variables we will later be using, and create a credential for the new Terraform service principal with either a certificate, password, or both. It will also retrieve the details for us to use later.
-
-> To download a cert use `az keyvault certificate download --vault-name $keyVault --name $certName --file "terraform.pem"`
+The below script will create the resources for us, initialise some variables we will later be using, and create a credential for the new Terraform service principal with a password. It will also retrieve the details for us to use later.
 
 ```bash
 # Initialize our directory
 cd infrastructure/terraform/terraform-ops
-echo -e "resource_prefix = \"REPLACE_WITH_SOMETHING_UNIQUE\"" > global.auto.tfvars
+echo -e "resource_prefix = \"changeme\"" > terraform.tfvars
 
 # Run Terraform
 terraform init
@@ -60,21 +58,14 @@ terraform validate
 terraform apply
 
 # Collect information
-resourceGroup=$(terraform output resource_group_name)
-location=$(terraform output resource_group_location)
-storageAccount=$(terraform output terraform_storage_account_name)
-keyVault=$(terraform output key_vault_name)
-terraformSpClientId=$(terraform output terraform_client_id)
-certName="TerraformSP-$(terraform output terraform_object_id)"
+resourceGroup=$(terraform output -raw resource_group_name)
+location=$(terraform output -raw resource_group_location)
+storageAccount=$(terraform output -raw terraform_storage_account_name)
+keyVault=$(terraform output -raw key_vault_name)
+terraformSpClientId=$(terraform output -raw terraform_client_id)
+certName="TerraformSP-$(terraform output -raw terraform_object_id)"
 
 # Generate credentials
-# Certificate
-az ad sp credential reset --create-cert \
-  --name $terraformSpClientId \
-  --keyvault $keyVault \
-  --cert $certName
-
-# Password
 terraformSpPassword=$(
   az ad sp credential reset \
     --name $terraformSpClientId \
@@ -90,11 +81,13 @@ cd ../../..
 
 Packer configuration can be found under [infrastructure/packer/azdo-agent](infrastructure/packer/azdo-agent) for the agent.
 
+You may need to set the client_id and client_secret variables depending on your configuration.
+
 ```bash
 subscriptionId=$(az account show --output tsv --query id)
 devopsImageName="linux-agent-image"
 cd infrastructure/packer/azdo-agent
-packer build -var resource_group=$resourceGroup -var image_name=$devopsImageName -var location=$location -var subscription_id=$subscriptionId agent.json
+packer build -var resource_group=$resourceGroup -var image_name=$devopsImageName -var location=$location -var subscription_id=$subscriptionId agent.pkr.hcl
 
 devopsImageId="/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Compute/images/$devopsImageName"
 echo "Image ID: $devopsImageId"
@@ -110,7 +103,7 @@ First we will create a file to store our generated source image from the last st
 ```bash
 # Initialize our directory
 cd infrastructure/terraform/kcidemo
-echo -e "resource_prefix = \"REPLACE_WITH_SOMETHING_UNIQUE\"" > global.auto.tfvars
+echo -e "resource_prefix = \"changeme\"" > terraform.tfvars
 
 # Run Terraform
 terraform init \
@@ -120,12 +113,12 @@ terraform validate
 terraform apply
 
 # Collect information
-aksResourceGroup=$(terraform output aks_resource_group_name)
-aksName=$(terraform output aks_name)
-acrName=$(terraform output acr_name)
-acrAdminUser=$(terraform output acr_admin_user)
-acrAdminPassword=$(terraform output acr_admin_password)
-acrLoginServer=$(terraform output acr_login_server)
+aksResourceGroup=$(terraform output -raw resource_group_name)
+aksName=$(terraform output -raw aks_name)
+acrName=$(terraform output -raw acr_name)
+acrAdminUser=$(terraform output -raw acr_admin_user)
+acrAdminPassword=$(terraform output -raw acr_admin_password)
+acrLoginServer=$(terraform output -raw acr_login_server)
 
 # Return to our root
 cd ../../..
@@ -140,7 +133,7 @@ Once the apply step finishes you should have an AKS cluster and ACR under your n
 The below script will collect our AKS credentials and then apply the configuration used to give Azure DevOps a namespace to access and deploy to.
 
 ```bash
-az aks get-credentials --resource-group $aksResourceGroup --name $aksName
+az aks get-credentials --resource-group $aksResourceGroup --name $aksName --admin
 kubectl apply -f infrastructure/kubernetes/kcidemo
 ```
 
@@ -150,7 +143,7 @@ kubectl apply -f infrastructure/kubernetes/kcidemo
 
 The Azure DevOps Configuration uses a mixture of components, including its Repos, Pipelines and Tests for demonstration purposes.
 
-We can create our project and set it as the default using the below commands
+We can create our project and set it as the default using the below commands - if prompted for an organization, follow the error prompt and run the requested command e.g. `az devops configure --defaults organization=https://dev.azure.com/MyOrganization/`
 
 ```bash
 az devops project create --name kcidemo

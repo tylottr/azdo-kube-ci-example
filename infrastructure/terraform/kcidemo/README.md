@@ -48,8 +48,8 @@ Below describes the steps to deploy this template.
     * Terraform has a number of ways to authenticate. See [here](https://www.terraform.io/docs/providers/azurerm/guides/azure_cli.html) for more information.
 3. Initialise Terraform with `terraform init`
     * By default, state is stored locally. State can be stored in different backends. See [here](https://www.terraform.io/docs/backends/types/index.html) for more information.
-4. Set the workspace with `terraform workspace select <replace with environment>`
-    * If the workspace does not exist, use `terraform workspace new <replace with environment>`
+4. (Optional) Set the workspace with `terraform workspace select changeme`
+    * If the workspace does not exist, use `terraform workspace new changeme`
 5. Generate a plan with `terraform plan -out tf.plan`
 6. If the plan passes, apply it with `terraform apply tf.plan`
 
@@ -106,14 +106,17 @@ In the [files/kubernetes/manifests/apps](apps) folder we a demonstration applica
 
 ### Kubernetes Helm
 
-Helm is a package manager and can be used to template or consume templated Kubernetes manifests. You can download and read up on Helm [here](https://helm.sh/).
+Helm is a package manager and can be used to template or consume templated Kubernetes manifests. You can download and read up on Helm [here](https://helm.sh/). Several Helm charts and documentation on them can be found over at https://artifacthub.io
 
 A number of basic Values files have been set up with version pinning. In the comments are steps to use the charts but we can use the following while within the [files/kubernetes/helm/values](files/kubernetes/helm/values) directory:
 
-> Nginx Ingress is really the "main" one to use here, as it allows external access into cluster resources e.g. microservices. You may want to check the yaml files directly as they have more information on how to provision.
+> Ingress Nginx is really the "main" one to use here, as it allows external access into cluster resources e.g. microservices. You may want to check the yaml files directly as they have more information on how to provision.
 
-- Nginx Ingress: `helm install nginx-ingress stable/nginx-ingress --namespace kube-system --values ./nginx-ingress.yaml`
-- Cert Manager: `helm install cert-manager jetstack/cert-manager --namespace kube-system --values ./cert-manager.yaml`
-- Grafana: `helm install grafana stable/grafana --namespace monitoring --values ./grafana.yaml`
-- Prometheus: `helm install prometheus stable/prometheus --namespace monitoring --values ./prometheus.yaml`
-- Loki: `helm install loki loki/loki-stack - --namespace monitoring --values ./loki.yaml`
+- [Ingress Nginx](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx) with values in files/kubernetes/helm/values/nginx-ingress.yaml
+- [Cert Manager](https://artifacthub.io/packages/helm/cert-manager/cert-manager) with values in files/kubernetes/helm/values/cert-manager.yaml
+  - See documentation for this, you need custom CRD's. The documentation should give you the exact command to run.
+- [Grafana](https://artifacthub.io/packages/helm/grafana/grafana) with values in files/kubernetes/helm/values/grafana.yaml
+- [Prometheus](https://artifacthub.io/packages/helm/prometheus-community/prometheus) with values in files/kubernetes/helm/values/prometheus.yaml
+- [Loki](https://artifacthub.io/packages/helm/grafana/loki-stack) with values in files/kubernetes/helm/values/loki.yaml
+
+Each file can be used to do a Helm release or you can use [helmfile](https://github.com/roboll/helmfile) and `helmfile apply` against [files/kubernetes/helm/helmfile.yaml](files/kubernetes/helm/helmfile.yaml) - this requires the [helm-diff](https://github.com/databus23/helm-diff) plugin
