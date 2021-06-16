@@ -143,7 +143,7 @@ kubectl apply -f infrastructure/kubernetes/kcidemo
 
 The Azure DevOps Configuration uses a mixture of components, including its Repos, Pipelines and Tests for demonstration purposes.
 
-We can create our project and set it as the default using the below commands
+We can create our project and set it as the default using the below commands - if prompted for an organization, follow the error prompt and run the requested command e.g. `az devops configure --defaults organization=https://dev.azure.com/MyOrganization/`
 
 ```bash
 az devops project create --name kcidemo
