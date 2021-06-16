@@ -15,6 +15,9 @@ module "aks" {
   enable_acr_admin    = true
   enable_aks_aad_rbac = true
 
+  aks_node_min_count = 2
+  aks_node_max_count = 3
+
   // Explicit dependency on azurerm_resource_group.main used due to a problem with the
   // module not picking up the implicit dependency.
   depends_on = [azurerm_resource_group.main]
