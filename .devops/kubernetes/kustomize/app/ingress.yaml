@@ -11,7 +11,6 @@ spec:
     http:
       paths:
       - path: /
-        pathType: Prefix
         backend:
           serviceName: kci
           servicePort: http
