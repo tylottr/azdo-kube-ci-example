@@ -10,7 +10,7 @@
 parameters:
 - name: 'packerVersion'
   type: 'string'
-  default: '1.5.6'
+  default: '1.7.3'
 - name: 'azureSubscription'
   type: 'string'
   default: ''

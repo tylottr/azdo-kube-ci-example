@@ -29,9 +29,9 @@ This document consists of the following sections:
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
     - This can be installed using `az aks install-cli`.
 - [packer](https://www.packer.io/)
-- [terraform](https://www.terraform.io/) - 0.13
+- [terraform](https://www.terraform.io/)
 
-Prior to these tasks ensure that you have ran `az login` and selected the correct target subscription with `az account set --subscription <REPLACE_WITH_SUBSCRIPTION_ID_OR_NAME>`.
+Prior to these tasks ensure that you have ran `az login` and selected the correct target subscription with `az account set --subscription changeme`.
 
 ## 2. Infrastructure Configuration
 
@@ -45,9 +45,7 @@ To create our base Azure resources, we will use a Terraform configuration stored
 
 This resource group will be used for our shared resources.
 
-The below script will create the resources for us, initialise some variables we will later be using, and create a credential for the new Terraform service principal with either a certificate, password, or both. It will also retrieve the details for us to use later.
-
-> To download a cert use `az keyvault certificate download --vault-name $keyVault --name $certName --file "terraform.pem"`
+The below script will create the resources for us, initialise some variables we will later be using, and create a credential for the new Terraform service principal with a password. It will also retrieve the details for us to use later.
 
 ```bash
 # Initialize our directory
@@ -83,11 +81,13 @@ cd ../../..
 
 Packer configuration can be found under [infrastructure/packer/azdo-agent](infrastructure/packer/azdo-agent) for the agent.
 
+You may need to set the client_id and client_secret variables depending on your configuration.
+
 ```bash
 subscriptionId=$(az account show --output tsv --query id)
 devopsImageName="linux-agent-image"
 cd infrastructure/packer/azdo-agent
-packer build -var resource_group=$resourceGroup -var image_name=$devopsImageName -var location=$location -var subscription_id=$subscriptionId agent.json
+packer build -var resource_group=$resourceGroup -var image_name=$devopsImageName -var location=$location -var subscription_id=$subscriptionId agent.pkr.hcl
 
 devopsImageId="/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Compute/images/$devopsImageName"
 echo "Image ID: $devopsImageId"
@@ -113,12 +113,12 @@ terraform validate
 terraform apply
 
 # Collect information
-aksResourceGroup=$(terraform output aks_resource_group_name)
-aksName=$(terraform output aks_name)
-acrName=$(terraform output acr_name)
-acrAdminUser=$(terraform output acr_admin_user)
-acrAdminPassword=$(terraform output acr_admin_password)
-acrLoginServer=$(terraform output acr_login_server)
+aksResourceGroup=$(terraform output -raw aks_resource_group_name)
+aksName=$(terraform output -raw aks_name)
+acrName=$(terraform output -raw acr_name)
+acrAdminUser=$(terraform output -raw acr_admin_user)
+acrAdminPassword=$(terraform output -raw acr_admin_password)
+acrLoginServer=$(terraform output -raw acr_login_server)
 
 # Return to our root
 cd ../../..

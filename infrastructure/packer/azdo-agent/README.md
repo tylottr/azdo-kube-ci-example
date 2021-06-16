@@ -4,7 +4,7 @@ Thie repository contains resources to help create an Azure DevOps agent.
 
 This includes:
 
-- `agent.json`, a Packer definition file to create an Azure VM image
+- `agent.hcl`, a Packer definition file to create an Azure VM image
     - Alternatively, you can look at [this repository](https://github.com/actions/virtual-environments/tree/master/images) for a much better version.
 - `agent.yml`, an Ansible playbook that utilises the `azdo-ubuntu-agent` role stored under the roles directory.
 - A Terraform configuration to deploy the new image to a VMSS resource, enabling the use of VMSS-backed agent pools.
@@ -14,7 +14,7 @@ This includes:
 - [Packer](https://packer.io/)
 - [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/index.html)
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
-- [terraform](https://www.terraform.io/) - 0.13
+- [terraform](https://www.terraform.io/)
 
 ## Variables
 
@@ -31,7 +31,6 @@ Variables can be set either with `-var` or with `-var-file` keywords.
 |client_secret|The client secret used to access the subscription|Uses AZURE_CLIENT_SECREt environment variable|No|
 |location|The location to make the image in|`"centralus"`|No|
 |resource_group|The resource group to make the image in||Yes|
-|image_name|The name of the image|`"vsts-agent-{{ isotime \"2006-01-02\" }}"`|No|
 
 ### Ansible
 
