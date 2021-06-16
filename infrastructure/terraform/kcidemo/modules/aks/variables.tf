@@ -115,7 +115,7 @@ variable "enable_acr_admin" {
 ##########
 
 variable "aks_kubernetes_version" {
-  description = "Version of Kubernetes to use in the cluster - use 'latest' for the latest available version"
+  description = "Version of Kubernetes to use in the cluster - leave blank for latest"
   type        = string
   default     = null
 

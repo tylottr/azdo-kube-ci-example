@@ -11,10 +11,9 @@ module "aks" {
   resource_prefix = var.resource_prefix
   tags            = var.tags
 
-  enable_acr       = true
-  enable_acr_admin = true
-
-  aks_kubernetes_version = "latest"
+  enable_acr          = true
+  enable_acr_admin    = true
+  enable_aks_aad_rbac = true
 
   // Explicit dependency on azurerm_resource_group.main used due to a problem with the
   // module not picking up the implicit dependency.

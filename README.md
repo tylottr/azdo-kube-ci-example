@@ -133,7 +133,7 @@ Once the apply step finishes you should have an AKS cluster and ACR under your n
 The below script will collect our AKS credentials and then apply the configuration used to give Azure DevOps a namespace to access and deploy to.
 
 ```bash
-az aks get-credentials --resource-group $aksResourceGroup --name $aksName
+az aks get-credentials --resource-group $aksResourceGroup --name $aksName --admin
 kubectl apply -f infrastructure/kubernetes/kcidemo
 ```
 

@@ -59,7 +59,7 @@ resource "azurerm_kubernetes_cluster" "main" {
   location            = var.location
   tags                = var.tags
 
-  kubernetes_version = var.aks_kubernetes_version == "latest" ? data.azurerm_kubernetes_service_versions.current.latest_version : var.aks_kubernetes_version
+  kubernetes_version = var.aks_kubernetes_version == null ? data.azurerm_kubernetes_service_versions.current.latest_version : var.aks_kubernetes_version
 
   dns_prefix = local.resource_prefix
 
