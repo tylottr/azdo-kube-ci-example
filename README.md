@@ -113,7 +113,7 @@ terraform validate
 terraform apply
 
 # Collect information
-aksResourceGroup=$(terraform output -raw aks_resource_group_name)
+aksResourceGroup=$(terraform output -raw resource_group_name)
 aksName=$(terraform output -raw aks_name)
 acrName=$(terraform output -raw acr_name)
 acrAdminUser=$(terraform output -raw acr_admin_user)
