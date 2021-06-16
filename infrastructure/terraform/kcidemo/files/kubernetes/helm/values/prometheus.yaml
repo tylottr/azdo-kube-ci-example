@@ -1,7 +1,8 @@
 # Provision steps:
 #
-# helm repo add stable https://kubernetes-charts.storage.googleapis.com
-# helm install prometheus stable/prometheus --version 11.11.1 --namespace monitoring --values ./prometheus.yaml
+# helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+# helm repo add kube-state-metrics https://kubernetes.github.io/kube-state-metrics
+# helm install prometheus prometheus-community/prometheus --version 14.2.0 --namespace monitoring --values ./prometheus.yaml
 rbac:
   create: true
 

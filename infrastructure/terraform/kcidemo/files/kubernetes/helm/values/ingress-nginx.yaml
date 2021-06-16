@@ -1,7 +1,7 @@
 # Provision steps:
 #
-# helm repo add stable https://kubernetes-charts.storage.googleapis.com
-# helm install nginx-ingress stable/nginx-ingress --version 1.41.2 --namespace kube-system --values ./nginx-ingress.yaml
+# helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+# helm install ingress-nginx ingress-nginx/ingress-nginx --version 3.33.0 --namespace kube-system --values ./ingress-nginx.yaml
 
 rbac:
   create: true

@@ -1,7 +1,7 @@
 # Provision steps:
 #
-# helm repo add stable https://kubernetes-charts.storage.googleapis.com
-# helm install grafana stable/grafana --version 5.5.5 --namespace monitoring --values ./grafana.yaml
+# helm repo add grafana https://grafana.github.io/helm-charts
+# helm install grafana grafana/grafana --version 6.13.0 --namespace monitoring --values ./grafana.yaml
 
 replicas: 1
 persistence:
