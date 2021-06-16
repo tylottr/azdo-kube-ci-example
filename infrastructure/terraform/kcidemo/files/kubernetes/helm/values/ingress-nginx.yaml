@@ -28,11 +28,11 @@ controller:
       - podAffinityTerm:
           labelSelector:
             matchExpressions:
-            - key: app
+            - key: app.kubernetes.io/name
               operator: In
               values:
-              - nginx-ingress
-            - key: component
+              - ingress-nginx
+            - key: app.kubernetes.io/component
               operator: In
               values:
               - controller
@@ -44,6 +44,7 @@ controller:
     service:
       annotations:
         prometheus.io/scrape: "true"
+        prometheus.io/port: "10254"
 
   autoscaling:
     enabled: true
