@@ -7,6 +7,14 @@ replicas: 1
 persistence:
   enabled: false
 
+resources:
+  requests:
+    cpu: 10m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
 plugins:
 - grafana-simple-json-datasource
 
@@ -73,4 +81,3 @@ dashboards:
       gnetId: 9614
       revision: 1
       datasource: Prometheus
-    
