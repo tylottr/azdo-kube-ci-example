@@ -4,21 +4,21 @@ kind: ConfigMap
 metadata:
   name: nginx-files
   labels:
-    app: nginx
+    app.kubernetes.io/name: nginx
 data:
   nginx.config: |
     server {
-        listen       3000;
-        server_name  _;
+      listen       3000;
+      server_name  _;
 
-        location / {
-            root   /usr/share/nginx/html;
-            index  index.html;
-        }
+      location / {
+        root   /usr/share/nginx/html;
+        index  index.html;
+      }
 
-        location /health {
-            return 200 "OK\n";
-        }
+      location /health {
+        return 200 "OK\n";
+      }
     }
   nginx.index: |
     Hello from Kubernetes!
@@ -28,16 +28,16 @@ kind: Deployment
 metadata:
   name: nginx
   labels:
-    app: nginx
+    app.kubernetes.io/name: nginx
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: nginx
+      app.kubernetes.io/name: nginx
   template:
     metadata:
       labels:
-        app: nginx
+        app.kubernetes.io/name: nginx
       annotations:
         container.apparmor.security.beta.kubernetes.io/service: runtime/default
         seccomp.security.alpha.kubernetes.io/pod: runtime/default
@@ -103,22 +103,23 @@ kind: Service
 metadata:
   name: nginx
   labels:
-    app: nginx
+    app.kubernetes.io/name: nginx
 spec:
   type: ClusterIP
   selector:
-    app: nginx
+    app.kubernetes.io/name: nginx
   ports:
   - name: http
     port: 80
+    protocol: TCP
     targetPort: http
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: nginx
   labels:
-    app: nginx
+    app.kubernetes.io/name: nginx
   annotations:
     kubernetes.io/ingress.class: nginx
 spec:
@@ -126,6 +127,9 @@ spec:
   - http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
-          serviceName: nginx
-          servicePort: http
+          service:
+            name: nginx
+            port: 
+              name: http
