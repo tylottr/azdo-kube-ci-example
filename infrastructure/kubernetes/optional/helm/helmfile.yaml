@@ -16,8 +16,7 @@ releases:
   version: "3.33.0"
   namespace: ingress-nginx
   createNamespace: true
-  values:
-  - ./values/ingress-nginx.yaml
+  values: ["./values/ingress-nginx.yaml"]
   installed: true
   atomic: true
 - name: cert-manager
@@ -25,8 +24,7 @@ releases:
   version: "1.4.0"
   namespace: cert-manager
   createNamespace: true
-  values:
-  - ./values/cert-manager.yaml
+  values: ["./values/cert-manager.yaml"]
   installed: true
   atomic: true
 - name: grafana
@@ -34,8 +32,7 @@ releases:
   version: "6.13.0"
   namespace: monitoring
   createNamespace: true
-  values:
-  - ./values/grafana.yaml
+  values: ["./values/grafana.yaml"]
   installed: true
   atomic: true
 - name: prometheus
@@ -43,8 +40,7 @@ releases:
   version: "14.2.0"
   namespace: monitoring
   createNamespace: true
-  values:
-  - ./values/prometheus.yaml
+  values: ["./values/prometheus.yaml"]
   installed: true
   atomic: true
 - name: loki
@@ -52,7 +48,6 @@ releases:
   version: "2.4.1"
   namespace: monitoring
   createNamespace: true
-  values:
-  - ./values/loki-stack.yaml
+  values: ["./values/loki-stack.yaml"]
   installed: true
   atomic: true

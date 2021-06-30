@@ -134,8 +134,53 @@ The below script will collect our AKS credentials and then apply the configurati
 
 ```bash
 az aks get-credentials --resource-group $aksResourceGroup --name $aksName --admin
-kubectl apply -f infrastructure/kubernetes/kcidemo
+kubectl apply -f infrastructure/kubernetes/kcidemo/manifests
 ```
+
+In addition to the above there are a number of additional manifests and helm charts available in this repository.
+
+**Storage Classes**
+
+In the [storage-classes](infrastructure/kubernetes/optional/manifests/storage-classes) folder we have the below files:
+
+- [aks-disk.yaml](infrastructure/kubernetes/optional/manifests/storage-classes/aks-disk.yaml): A collection of storage classes for AKS Managed Disk resources.
+- [aks-file.yaml](infrastructure/kubernetes/optional/manifests/storage-classes/aks-file.yaml): A collection of storage classes for AKS File resources
+
+**RBAC**
+
+In the [rbac](infrastructure/kubernetes/optional/manifests/rbac) folder we have the below infrastructure:
+
+- [aks-aad.yaml](infrastructure/kubernetes/optional/manifests/rbac/aks-aad.yaml): Needs updating prior to apply, but this is used to create group mappings to Azure Active Directory. This includes Cluster Admin and Cluster View roles.
+- [cluster-admin.yaml](infrastructure/kubernetes/optional/manifests/rbac/cluster-admin.yaml): Creates a Cluster Admin service account.
+- [cluster-viewer.yaml](infrastructure/kubernetes/optional/manifests/rbac/cluster-viewer.yaml): Creates a Cluster View service account.
+
+**Cert Manager**
+
+In the [cert-manager](infrastructure/kubernetes/optional/manifests/cert-manager) folder we have the below files:
+
+- [certificate.yaml](infrastructure/kubernetes/optional/manifests/cert-manager/certificate.yaml): Needs updating. This is used to actually generate certificates as a resource. We can also use [Ingress Shims](https://cert-manager.io/docs/usage/ingress/) to create certificates directly through Ingresses.
+- [clusterissuers.yaml](infrastructure/kubernetes/optional/manifests/cert-manager/clusterissuers.yaml): Needs updating prior to apply, but this is used to create Production and Staging ClusterIssuers for generating certificates. 
+
+**Apps**
+
+In the [apps](infrastructure/kubernetes/optional/manifests/apps) folder we a demonstration application using Nginx.
+
+**Helm**
+
+Helm is a package manager and can be used to template or consume templated Kubernetes manifests. You can download and read up on Helm [here](https://helm.sh/). Several Helm charts and documentation on them can be found over at https://artifacthub.io
+
+A number of Values files have been set up with version pinning. In the comments are steps to use the charts but we can use the following while within the [infrastructuer/kubernetes/optional/helm/values](infrastructuer/kubernetes/optional/helm/values) directory:
+
+> Ingress Nginx is really the "main" one to use here, as it allows external access into cluster resources e.g. microservices. You may want to check the yaml files directly as they have more information on how to provision.
+
+- [Ingress Nginx](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx) with values in [ingress-nginx.yaml](infrastructure/kubernetes/optional/helm/values/ingress-nginx.yaml)
+- [Cert Manager](https://artifacthub.io/packages/helm/cert-manager/cert-manager) with values in [cert-manager.yaml](infrastructure/kubernetes/optional/helm/values/cert-manager.yaml)
+  - See documentation for this, you need custom CRD's. The documentation should give you the exact command to run.
+- [Grafana](https://artifacthub.io/packages/helm/grafana/grafana) with values in [grafana.yaml](infrastructure/kubernetes/optional/helm/values/grafana.yaml)
+- [Prometheus](https://artifacthub.io/packages/helm/prometheus-community/prometheus) with values in [prometheus.yaml](infrastructure/kubernetes/optional/helm/values/prometheus.yaml)
+- [Loki](https://artifacthub.io/packages/helm/grafana/loki-stack) with values in [loki-stack.yaml](infrastructure/kubernetes/optional/helm/values/loki-stack.yaml)
+
+Each file can be used to do a Helm release or you can use [helmfile](https://github.com/roboll/helmfile) and `helmfile apply` against [infrastructure/kubernetes/optional/helm/helmfile.yaml](infrastructure/kubernetes/optional/helm/helmfile.yaml) - this requires the [helm-diff](https://github.com/databus23/helm-diff) plugin.
 
 ## 3. Azure DevOps Configuration
 

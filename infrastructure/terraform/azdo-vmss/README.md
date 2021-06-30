@@ -34,19 +34,3 @@ In Azure, you need:
 |vmss_id|ID of the VM Scale Set|
 |vmss_name|Name of the VM Scale Set|
 
-## Deployment
-
-Below describes the steps to deploy this template.
-
-1. Set variables for the deployment
-    * Terraform has a number of ways to set variables. See [here](https://www.terraform.io/docs/configuration/variables.html#assigning-values-to-root-module-variables) for more information.
-2. Log into Azure with `az login` and set your subscription with `az account set --subscription='<replace with subscription id or name>'`
-    * Terraform has a number of ways to authenticate. See [here](https://www.terraform.io/docs/providers/azurerm/guides/azure_cli.html) for more information.
-3. Initialise Terraform with `terraform init`
-    * By default, state is stored locally. State can be stored in different backends. See [here](https://www.terraform.io/docs/backends/types/index.html) for more information.
-4. (Optional) Set the workspace with `terraform workspace select changeme`
-    * If the workspace does not exist, use `terraform workspace new changeme`
-5. Generate a plan with `terraform plan -out tf.plan`
-6. If the plan passes, apply it with `terraform apply tf.plan`
-
-In the event the deployment needs to be destroyed, you can run `terraform destroy` in place of steps 5 and 6.
