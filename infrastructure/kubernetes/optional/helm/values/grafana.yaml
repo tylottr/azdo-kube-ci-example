@@ -18,33 +18,59 @@ datasources:
         type: prometheus
         access: proxy
         url: http://prometheus-server
+        uid: '1'
         isDefault: true
+        editable: false
       - name: Loki
         type: loki
         access: proxy
+        uid: '2'
         url: http://loki:3100
+        isDefault: false
+        editable: false
 
 dashboardProviders:
   dashboardproviders.yaml:
     apiVersion: 1
     providers:
-    - name: 'default'
+    - name: default
       orgId: 1
-      folder: ''
+      folder: default
+      folderUid: '1'
       type: file
-      disableDeletion: false
+      disableDeletion: true
       updateIntervalSeconds: 15
-      editable: true
+      allowUiUpdates: true
       options:
         path: /var/lib/grafana/dashboards/default
+    - name: cluster-monitoring
+      orgId: 1
+      folder: cluster-monitoring
+      folderUid: '2'
+      type: file
+      disableDeletion: true
+      updateIntervalSeconds: 15
+      allowUiUpdates: false
+      options:
+        path: /var/lib/grafana/dashboards/cluster-monitoring
 
 dashboards:
-  default:
+  default: {}
+  cluster-monitoring:
+    node-exporter-full:
+      gnetId: 1860
+      revision: 23
+      datasource: Prometheus
     kubernetes-cluster:
       gnetId: 10000
       revision: 1
+      datasource: Prometheus
+    prometheus-stats:
+      gnetId: 2
+      revision: 2
       datasource: Prometheus
     nginx:
       gnetId: 9614
       revision: 1
       datasource: Prometheus
+    
