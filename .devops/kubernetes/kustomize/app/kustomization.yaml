@@ -3,7 +3,7 @@ kind: Kustomization
 
 namePrefix: #appName#-
 commonLabels:
-  app: #appName#
+  app.kubernetes.io/name: #appName#
 
 bases:
 - ../base
