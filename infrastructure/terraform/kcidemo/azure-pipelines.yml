@@ -45,7 +45,7 @@ stages:
     terraformStateAzureSubscriptionName: '$(terraformStateAzureSubscriptionName)'
     terraformStateStorageAccountName: '$(terraformStateStorageAccountName)'
     azureSubscription: '$(terraformAzureSubscription)'
-    terraformAdditionalArgs: '-var-file tfvars/default.tfvars'
+    terraformAdditionalArgs: ''
     terraformApply: '$(terraformApply)'
     terraformInputVariables:
       resource_prefix: '$(resourcePrefix)'
@@ -77,7 +77,7 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          terraform output aks_config > config
+          terraform output -raw aks_config > config
           kubectl apply -f ../../kubernetes/kcidemo
           rm -f config
         workingDirectory: '$(terraformWorkingDirectoryBase)/$(templateName)'

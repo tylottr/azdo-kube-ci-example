@@ -10,7 +10,7 @@
 parameters:
 - name: 'terraformVersion'
   type: 'string'
-  default: '0.13.0'
+  default: '1.0.0'
 - name: 'terraformWorkingDirectory'
   type: 'string'
   default: '$(Build.Repository.LocalPath)'

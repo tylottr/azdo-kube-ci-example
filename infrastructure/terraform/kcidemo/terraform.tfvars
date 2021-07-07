@@ -1,3 +1,5 @@
+location = "UK South"
+
 tags = {
   "Terraform Managed" = "True"
   "Environment"       = "POC"
