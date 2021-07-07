@@ -115,10 +115,6 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   addon_profile {
-    kube_dashboard {
-      enabled = var.enable_aks_kube_dashboard
-    }
-
     oms_agent {
       enabled                    = var.enable_monitoring
       log_analytics_workspace_id = var.enable_monitoring ? coalesce(var.log_analytics_workspace_id, azurerm_log_analytics_workspace.main[0].id) : null
