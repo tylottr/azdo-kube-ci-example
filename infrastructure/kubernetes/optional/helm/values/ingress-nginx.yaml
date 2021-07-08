@@ -14,6 +14,9 @@ controller:
     enable-modsecurity: "true"
     enable-owasp-modsecurity-crs: "true"
 
+  service:
+    externalTrafficPolicy: Local
+
   resources:
     requests:
       cpu: 100m
